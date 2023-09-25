@@ -18,6 +18,7 @@ export default function Loading() {
         autoPlay
         source={require("../../assets/lottieFiles/loading.json")}
         loop
+        speed={1.7}
         style={{
           width: 80,
           height: 80,
