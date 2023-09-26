@@ -10,8 +10,9 @@
       "@screens/*": ["src/screens/*"],
       "@utils/*": ["src/utils/*"],
       "@navigator/*": ["src/navigator/*"],
-      "@assets/*": ["assets/*"],
-      "@types/*": ["src/types/*"]
+      "@lib/*": ["src/lib/*"],
+      "@types/*": ["src/types/*"],
+      "@assets/*": ["assets/*"]
     }
   }
 }

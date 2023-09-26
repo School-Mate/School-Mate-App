@@ -4,17 +4,22 @@ import * as Splash from "expo-splash-screen";
 import { useCallback, useEffect, useState } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import RootNavigator from "@/navigator/RootNavigator";
+import SchoolMateToastProvider from "@/lib/ToastProvider";
+import useFetch from "@/hooks/useFetch";
 
 Splash.preventAutoHideAsync();
 
 export default function App() {
   const [appIsReady, setAppIsReady] = useState(false);
+  const { triggerFetch: authFetcher } = useFetch({});
   useEffect(() => {
     async function prepare() {
       try {
-        // Pre-load fonts, make any API calls you need to do here
-        // Artificially delay for two seconds to simulate a slow loading
-        // experience. Please remove this if you copy and paste the code!
+        await authFetcher({
+          fetchOptions: {
+            url: "/auth/me",
+          },
+        });
       } catch (e) {
         console.warn(e);
       } finally {
@@ -32,13 +37,15 @@ export default function App() {
     }
   }, [appIsReady]);
 
-  if (!appIsReady) {
-    return <SplashScreen />;
-  }
-
   return (
-    <NavigationContainer>
-      <RootNavigator />
-    </NavigationContainer>
+    <SchoolMateToastProvider>
+      {appIsReady ? (
+        <NavigationContainer>
+          <RootNavigator />
+        </NavigationContainer>
+      ) : (
+        <SplashScreen />
+      )}
+    </SchoolMateToastProvider>
   );
 }

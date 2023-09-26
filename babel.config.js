@@ -14,6 +14,7 @@ module.exports = function (api) {
             "@utils": "./src/utils",
             "@navigator": "./src/navigator",
             "@types": "./src/types",
+            "@lib": "./src/lib",
             "@assets": "./assets",
           },
         },
