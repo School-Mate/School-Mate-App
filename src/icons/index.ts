@@ -1,0 +1,10 @@
+export { default as HomeLightIcon } from "./HomeLight";
+export { default as HomeIcon } from "./Home";
+export { default as BoardIcon } from "./Board";
+export { default as BoardLightIcon } from "./BoardLight";
+export { default as SectionIcon } from "./Section";
+export { default as SectionLightIcon } from "./SectionLight";
+export { default as MessageIcon } from "./Message";
+export { default as MessageLightIcon } from "./MessageLight";
+export { default as UserIcon } from "./User";
+export { default as UserLightIcon } from "./UserLight";

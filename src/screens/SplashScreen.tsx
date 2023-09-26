@@ -1,8 +1,13 @@
 import Lottie from "@/components/Lottie";
+import { StatusBar } from "expo-status-bar";
 import { Image, View } from "react-native";
 
 export default function SplashScreen() {
   return (
+    <>
+    <StatusBar
+      style="light"
+      />
     <View
       style={{
         backgroundColor: "#1F1F1F",
@@ -17,5 +22,6 @@ export default function SplashScreen() {
         }}
       />
     </View>
+    </>
   );
 }
