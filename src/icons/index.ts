@@ -8,3 +8,6 @@ export { default as MessageIcon } from "./Message";
 export { default as MessageLightIcon } from "./MessageLight";
 export { default as UserIcon } from "./User";
 export { default as UserLightIcon } from "./UserLight";
+export { default as DotIcon } from "./Dot";
+export { default as DotEmptyIcon } from "./DotIconEmpty";
+export { default as DotGradientIcon } from "./DotGradient";

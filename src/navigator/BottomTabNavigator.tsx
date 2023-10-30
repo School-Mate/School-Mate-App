@@ -1,5 +1,5 @@
 import Webview from "@/screens/Webview";
-import { Image } from "react-native";
+import { Image, View } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Home from "@/screens/HomeScreens/Home";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
@@ -15,6 +15,9 @@ import {
   MessageLightIcon,
   UserIcon,
   UserLightIcon,
+  DotIcon,
+  DotEmptyIcon,
+  DotGradientIcon,
 } from "@/icons";
 
 const Tab = createBottomTabNavigator();
@@ -23,7 +26,9 @@ export default function BottomTabNavigator() {
     <Tab.Navigator
       initialRouteName="Home"
       screenOptions={{
-        tabBarShowLabel: false,
+        tabBarStyle: {
+          height: 100,
+        },
       }}
     >
       <Tab.Screen
@@ -32,6 +37,8 @@ export default function BottomTabNavigator() {
         options={{
           tabBarIcon: ({ focused, size }) =>
             focused ? <HomeIcon /> : <HomeLightIcon />,
+          tabBarLabel: ({ focused }) =>
+            focused ? <DotIcon /> : <DotEmptyIcon />,
         }}
       />
       <Tab.Screen
@@ -40,14 +47,17 @@ export default function BottomTabNavigator() {
         options={{
           tabBarIcon: ({ focused, size }) =>
             focused ? <BoardIcon /> : <BoardLightIcon />,
+          tabBarLabel: ({ focused }) =>
+            focused ? <DotIcon /> : <DotEmptyIcon />,
         }}
       />
       <Tab.Screen
         name="List"
         component={Home}
         options={{
-          tabBarIcon: ({ focused, size }) =>
-            focused ? <SectionIcon /> : <SectionLightIcon />,
+          tabBarIcon: () => <SectionIcon />,
+          tabBarLabel: ({ focused }) =>
+            focused ? <DotGradientIcon /> : <DotEmptyIcon />,
         }}
       />
       <Tab.Screen
@@ -56,6 +66,8 @@ export default function BottomTabNavigator() {
         options={{
           tabBarIcon: ({ focused, size }) =>
             focused ? <MessageIcon /> : <MessageLightIcon />,
+          tabBarLabel: ({ focused }) =>
+            focused ? <DotIcon /> : <DotEmptyIcon />,
         }}
       />
       <Tab.Screen
@@ -64,6 +76,8 @@ export default function BottomTabNavigator() {
         options={{
           tabBarIcon: ({ focused, size }) =>
             focused ? <UserIcon /> : <UserLightIcon />,
+          tabBarLabel: ({ focused }) =>
+            focused ? <DotIcon /> : <DotEmptyIcon />,
         }}
       />
     </Tab.Navigator>
