@@ -13,11 +13,12 @@ export type WebviewScreenProps = StackScreenProps<
 
 export default function Webview({ navigation, route }: WebviewScreenProps) {
   const [visible, setVisible] = useState(true);
-  const targetUrl = "http://172.20.10.2:3000";
+  const targetUrl = "http://192.168.0.3:3000";
   const url = route.params?.url ?? targetUrl + "/intro";
 
   const requestOnMessage = async (e: WebViewMessageEvent): Promise<void> => {
     const nativeEvent = JSON.parse(e.nativeEvent.data);
+    console.log(nativeEvent);
     if (nativeEvent?.type === "ROUTER_EVENT") {
       const data: {
         path: string;
@@ -43,6 +44,24 @@ export default function Webview({ navigation, route }: WebviewScreenProps) {
           scrollenabled: data.scroll,
         });
         navigation.dispatch(pushAction);
+      }
+    } else if (nativeEvent?.type === "LOGIN_EVENT") {
+      const data: {
+        type: "callback" | "request";
+        loginType: "kakao" | "apple" | "phone";
+        token?: string;
+      } = nativeEvent.data;
+
+      if (data.type === "callback") {
+      } else if (data.type === "request") {
+        if (data.loginType === "apple") {
+          try {
+          } catch (e: any) {
+            if (e.code == "ERR_REQUEST_CANCELED") {
+              console.log("User canceled Apple Sign in.");
+            }
+          }
+        }
       }
     }
   };

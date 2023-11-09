@@ -15,13 +15,16 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": false
+      "supportsTablet": false,
+      "usesAppleSignIn": true,
+      "bundleIdentifier": "kr.codest.schoolmateapp"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#2545ED"
-      }
+      },
+      "package": "kr.codest.schoolmateapp"
     }
   }
 }
