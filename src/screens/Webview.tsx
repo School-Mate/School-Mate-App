@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { WebView, WebViewMessageEvent } from "react-native-webview";
 import { StackActions } from "@react-navigation/native";
 import type { StackScreenProps } from "@react-navigation/stack";
@@ -10,10 +10,11 @@ export type WebviewScreenProps = StackScreenProps<
   RootStackParamList,
   "Webview"
 >;
+
 export default function Webview({ navigation, route }: WebviewScreenProps) {
   const [visible, setVisible] = useState(true);
-  const targetUrl = "http://localhost:3001";
-  const url = route.params?.url ?? targetUrl + "/auth";
+  const targetUrl = "http://172.20.10.2:3000";
+  const url = route.params?.url ?? targetUrl + "/intro";
 
   const requestOnMessage = async (e: WebViewMessageEvent): Promise<void> => {
     const nativeEvent = JSON.parse(e.nativeEvent.data);
@@ -31,6 +32,7 @@ export default function Webview({ navigation, route }: WebviewScreenProps) {
           const resetAction = StackActions.replace("Webview", {
             url: `${targetUrl}${data.path}`,
             isStack: true,
+            scrollenabled: data.scroll,
           });
           navigation.dispatch(resetAction);
           return;
@@ -38,6 +40,7 @@ export default function Webview({ navigation, route }: WebviewScreenProps) {
         const pushAction = StackActions.push("Webview", {
           url: `${targetUrl}${data.path}`,
           isStack: true,
+          scrollenabled: data.scroll,
         });
         navigation.dispatch(pushAction);
       }
@@ -45,7 +48,7 @@ export default function Webview({ navigation, route }: WebviewScreenProps) {
   };
 
   return (
-    <SafeAreaView
+    <View
       style={{
         flex: 1,
         backgroundColor: "#fff",
@@ -58,9 +61,9 @@ export default function Webview({ navigation, route }: WebviewScreenProps) {
         }}
         onLoad={() => setVisible(false)}
         onMessage={requestOnMessage}
-        scrollEnabled={false}
+        scrollEnabled={route.params?.scrollenabled ?? false}
       />
       {visible && <Loading />}
-    </SafeAreaView>
+    </View>
   );
 }
