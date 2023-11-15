@@ -3,18 +3,38 @@ import { WebView, WebViewMessageEvent } from "react-native-webview";
 import { StackActions } from "@react-navigation/native";
 import type { StackScreenProps } from "@react-navigation/stack";
 import { RootStackParamList } from "@/types/statcks";
-import { SafeAreaView, View } from "react-native";
+import {
+  KeyboardAvoidingView,
+  NativeModules,
+  Platform,
+  SafeAreaView,
+  View,
+} from "react-native";
 import Loading from "@/components/Loading";
+import { Toast } from "react-native-toast-notifications";
 
 export type WebviewScreenProps = StackScreenProps<
   RootStackParamList,
   "Webview"
 >;
 
+const { StatusBarManager } = NativeModules;
+
 export default function Webview({ navigation, route }: WebviewScreenProps) {
   const [visible, setVisible] = useState(true);
-  const targetUrl = "http://192.168.0.3:3000";
+  const [statusBarHeight, setStatusBarHeight] = useState(0);
+  const targetUrl = process.env.EXPO_PUBLIC_WEBVIEW_URL;
   const url = route.params?.url ?? targetUrl + "/intro";
+
+  useEffect(() => {
+    Platform.OS == "ios"
+      ? StatusBarManager.getHeight(
+          (statusBarFrameData: { height: React.SetStateAction<number> }) => {
+            setStatusBarHeight(statusBarFrameData.height);
+          }
+        )
+      : null;
+  }, []);
 
   const requestOnMessage = async (e: WebViewMessageEvent): Promise<void> => {
     const nativeEvent = JSON.parse(e.nativeEvent.data);
@@ -30,20 +50,27 @@ export default function Webview({ navigation, route }: WebviewScreenProps) {
         navigation.dispatch(popAction);
       } else {
         if (data.type === "reset") {
-          const resetAction = StackActions.replace("Webview", {
+          navigation.reset({
+            index: 0,
+            routes: [
+              {
+                name: "Webview",
+                params: {
+                  url: `${targetUrl}${data.path}`,
+                  isStack: false,
+                  scrollenabled: data.scroll,
+                },
+              },
+            ],
+          });
+        } else {
+          const pushAction = StackActions.push("Webview", {
             url: `${targetUrl}${data.path}`,
             isStack: true,
             scrollenabled: data.scroll,
           });
-          navigation.dispatch(resetAction);
-          return;
+          navigation.dispatch(pushAction);
         }
-        const pushAction = StackActions.push("Webview", {
-          url: `${targetUrl}${data.path}`,
-          isStack: true,
-          scrollenabled: data.scroll,
-        });
-        navigation.dispatch(pushAction);
       }
     } else if (nativeEvent?.type === "LOGIN_EVENT") {
       const data: {
@@ -63,6 +90,14 @@ export default function Webview({ navigation, route }: WebviewScreenProps) {
           }
         }
       }
+    } else if (nativeEvent?.type === "TOAST_EVENT") {
+      const data: {
+        type: "success" | "error";
+        message: string;
+      } = nativeEvent.data;
+      Toast.show(data.message, {
+        type: data.type === "success" ? "success" : "danger",
+      });
     }
   };
 
@@ -73,16 +108,24 @@ export default function Webview({ navigation, route }: WebviewScreenProps) {
         backgroundColor: "#fff",
       }}
     >
-      <WebView
-        originWhitelist={["*"]}
-        source={{
-          uri: url,
-        }}
-        onLoad={() => setVisible(false)}
-        onMessage={requestOnMessage}
-        scrollEnabled={route.params?.scrollenabled ?? false}
-      />
-      {visible && <Loading />}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        style={{ flex: 1 }}
+      >
+        <WebView
+          originWhitelist={["*"]}
+          source={{
+            uri: url,
+          }}
+          onLoad={() => setVisible(false)}
+          onMessage={requestOnMessage}
+          userAgent={`SchoolMateApp ${Platform.OS}`}
+          scrollEnabled={route.params?.scrollenabled ?? false}
+          hideKeyboardAccessoryView={true}
+          automaticallyAdjustContentInsets={false}
+        />
+        {visible && <Loading />}
+      </KeyboardAvoidingView>
     </View>
   );
 }

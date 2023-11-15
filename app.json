@@ -16,7 +16,6 @@
     ],
     "ios": {
       "supportsTablet": false,
-      "usesAppleSignIn": true,
       "bundleIdentifier": "kr.codest.schoolmateapp"
     },
     "android": {

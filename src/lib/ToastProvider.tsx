@@ -17,7 +17,7 @@ export default function SchoolMateToastProvider({
       dangerColor="grey"
       warningColor="grey"
       normalColor="grey"
-      successIcon={<EvilIcons name="check" size={20} color="black" />}
+      successIcon={<EvilIcons name="check" size={20} color="#81c147" />}
       dangerIcon={<AntDesign name="close" size={20} color="#f05650" />}
       warningIcon={<AntDesign name="close" size={20} color="#f05650" />}
       textStyle={{ fontSize: 15, opacity: 1 }}
