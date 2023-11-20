@@ -3,6 +3,7 @@ import { WebView, WebViewMessageEvent } from "react-native-webview";
 import { StackActions } from "@react-navigation/native";
 import type { StackScreenProps } from "@react-navigation/stack";
 import { RootStackParamList } from "@/types/statcks";
+import * as SecureStore from "expo-secure-store";
 import {
   KeyboardAvoidingView,
   NativeModules,
@@ -12,6 +13,8 @@ import {
 } from "react-native";
 import Loading from "@/components/Loading";
 import { Toast } from "react-native-toast-notifications";
+import { authState } from "@/recoil/authState";
+import { useRecoilState } from "recoil";
 
 export type WebviewScreenProps = StackScreenProps<
   RootStackParamList,
@@ -22,19 +25,31 @@ const { StatusBarManager } = NativeModules;
 
 export default function Webview({ navigation, route }: WebviewScreenProps) {
   const [visible, setVisible] = useState(true);
-  const [statusBarHeight, setStatusBarHeight] = useState(0);
+  const [auth, setAuth] = useRecoilState(authState);
   const targetUrl = process.env.EXPO_PUBLIC_WEBVIEW_URL;
   const url = route.params?.url ?? targetUrl + "/intro";
 
-  useEffect(() => {
-    Platform.OS == "ios"
-      ? StatusBarManager.getHeight(
-          (statusBarFrameData: { height: React.SetStateAction<number> }) => {
-            setStatusBarHeight(statusBarFrameData.height);
-          }
-        )
-      : null;
-  }, []);
+  const initialJavaScript = `
+    async(() => {
+      const csrfToken = await fetch("/api/auth/csrf")
+        .then((res) => res.json())
+        .then((res) => res.csrfToken);
+      console.log(csrfToken);
+      const accessData = await fetch("/api/auth/callback/credentials", {
+        method: "POST",
+        body: JSON.stringify({
+          provider: "credentials",
+          redirect: false,
+          csrfToken,
+          callbackUrl: "${process.env.EXPO_PUBLIC_WEBVIEW_URL}/auth/login",
+          code: "${auth.accessToken}",
+          json: true,
+        }),
+      }).then((res) => res.json());
+      console.log(accessData);
+    })();
+    true;
+  `;
 
   const requestOnMessage = async (e: WebViewMessageEvent): Promise<void> => {
     const nativeEvent = JSON.parse(e.nativeEvent.data);
@@ -76,10 +91,39 @@ export default function Webview({ navigation, route }: WebviewScreenProps) {
       const data: {
         type: "callback" | "request";
         loginType: "kakao" | "apple" | "phone";
-        token?: string;
+        token?: {
+          accessToken: string;
+          refreshToken: string;
+        };
       } = nativeEvent.data;
 
       if (data.type === "callback") {
+        if (data.loginType === "phone") {
+          await SecureStore.setItemAsync(
+            "accessToken",
+            data.token?.accessToken ?? ""
+          );
+          await SecureStore.setItemAsync(
+            "refreshToken",
+            data.token?.refreshToken ?? ""
+          );
+          setAuth({
+            accessToken: data.token?.accessToken ?? "",
+            refreshToken: data.token?.refreshToken ?? "",
+          });
+          navigation.reset({
+            index: 0,
+            routes: [
+              {
+                name: "Webview",
+                params: {
+                  url: `${targetUrl}/main`,
+                  isStack: false,
+                },
+              },
+            ],
+          });
+        }
       } else if (data.type === "request") {
         if (data.loginType === "apple") {
           try {
@@ -117,15 +161,28 @@ export default function Webview({ navigation, route }: WebviewScreenProps) {
           source={{
             uri: url,
           }}
+          nativeConfig={{
+            props: {
+              webContentsDebuggingEnabled: true,
+              console: new MyLogger(),
+            },
+          }}
           onLoad={() => setVisible(false)}
           onMessage={requestOnMessage}
           userAgent={`SchoolMateApp ${Platform.OS}`}
           scrollEnabled={route.params?.scrollenabled ?? false}
           hideKeyboardAccessoryView={true}
           automaticallyAdjustContentInsets={false}
+          injectedJavaScript={initialJavaScript}
         />
         {visible && <Loading />}
       </KeyboardAvoidingView>
     </View>
   );
+}
+
+class MyLogger {
+  log = (message: any) => {
+    console.log(message); // Print in RN logs for now...
+  };
 }

@@ -62,8 +62,7 @@ export default function useFetch({
         ...fetchOptions,
         ...oFetchInit,
       })
-        .then((response) => {
-            console.log(response)
+        .then(response => {
           if (!response) {
             throw new Error("No response");
           }
@@ -125,7 +124,7 @@ export default function useFetch({
                 failureToastObject.fallback.message,
                 {
                   ...(failureToastObject.fallback.options ?? {
-                    type: 'danger',
+                    type: "danger",
                     isLoading: false,
                   }),
                 }

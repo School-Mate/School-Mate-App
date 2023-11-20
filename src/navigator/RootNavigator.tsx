@@ -4,9 +4,13 @@ import {
 } from "@react-navigation/stack";
 import Webview from "@/screens/Webview";
 import { RootStackParamList } from "@/types/statcks";
+import { authState } from "@/recoil/authState";
+import { useRecoilState } from "recoil";
 
 const Stack = createStackNavigator<RootStackParamList>();
 export default function RootNavigator() {
+  const [auth, setAuth] = useRecoilState(authState);
+
   return (
     <Stack.Navigator
       initialRouteName="Webview"
@@ -35,6 +39,11 @@ export default function RootNavigator() {
           },
         }}
         name="Webview"
+        initialParams={{
+          url: auth.accessToken
+            ? process.env.EXPO_PUBLIC_WEBVIEW_URL
+            : undefined,
+        }}
         component={Webview}
       />
     </Stack.Navigator>
