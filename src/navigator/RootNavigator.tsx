@@ -41,7 +41,9 @@ export default function RootNavigator() {
         name="Webview"
         initialParams={{
           url: auth.accessToken
-            ? process.env.EXPO_PUBLIC_WEBVIEW_URL
+            ? process.env.EXPO_PUBLIC_WEBVIEW_URL +
+              "/auth/login/app?token=" +
+              auth.accessToken
             : undefined,
         }}
         component={Webview}

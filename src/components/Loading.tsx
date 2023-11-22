@@ -12,6 +12,7 @@ export default function Loading() {
         justifyContent: "center",
         alignItems: "center",
         position: "absolute",
+        backgroundColor: "rgba(0,0,0,0.5)",
       }}
     >
       <Lottie

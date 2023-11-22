@@ -21,35 +21,11 @@ export type WebviewScreenProps = StackScreenProps<
   "Webview"
 >;
 
-const { StatusBarManager } = NativeModules;
-
 export default function Webview({ navigation, route }: WebviewScreenProps) {
   const [visible, setVisible] = useState(true);
   const [auth, setAuth] = useRecoilState(authState);
   const targetUrl = process.env.EXPO_PUBLIC_WEBVIEW_URL;
   const url = route.params?.url ?? targetUrl + "/intro";
-
-  const initialJavaScript = `
-    async(() => {
-      const csrfToken = await fetch("/api/auth/csrf")
-        .then((res) => res.json())
-        .then((res) => res.csrfToken);
-      console.log(csrfToken);
-      const accessData = await fetch("/api/auth/callback/credentials", {
-        method: "POST",
-        body: JSON.stringify({
-          provider: "credentials",
-          redirect: false,
-          csrfToken,
-          callbackUrl: "${process.env.EXPO_PUBLIC_WEBVIEW_URL}/auth/login",
-          code: "${auth.accessToken}",
-          json: true,
-        }),
-      }).then((res) => res.json());
-      console.log(accessData);
-    })();
-    true;
-  `;
 
   const requestOnMessage = async (e: WebViewMessageEvent): Promise<void> => {
     const nativeEvent = JSON.parse(e.nativeEvent.data);
@@ -167,13 +143,13 @@ export default function Webview({ navigation, route }: WebviewScreenProps) {
               console: new MyLogger(),
             },
           }}
+          allowFileAccess
           onLoad={() => setVisible(false)}
           onMessage={requestOnMessage}
           userAgent={`SchoolMateApp ${Platform.OS}`}
           scrollEnabled={route.params?.scrollenabled ?? false}
           hideKeyboardAccessoryView={true}
           automaticallyAdjustContentInsets={false}
-          injectedJavaScript={initialJavaScript}
         />
         {visible && <Loading />}
       </KeyboardAvoidingView>
