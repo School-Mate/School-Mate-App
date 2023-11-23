@@ -45,6 +45,7 @@ export default function RootNavigator() {
               "/auth/login/app?token=" +
               auth.accessToken
             : undefined,
+          scrollenabled: true,
         }}
         component={Webview}
       />
