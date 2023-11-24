@@ -6,6 +6,7 @@ import { RootStackParamList } from "@/types/statcks";
 import * as SecureStore from "expo-secure-store";
 import {
   KeyboardAvoidingView,
+  Linking,
   NativeModules,
   Platform,
   SafeAreaView,
@@ -29,7 +30,7 @@ export default function Webview({ navigation, route }: WebviewScreenProps) {
 
   const requestOnMessage = async (e: WebViewMessageEvent): Promise<void> => {
     const nativeEvent = JSON.parse(e.nativeEvent.data);
-    console.log(nativeEvent);
+
     if (nativeEvent?.type === "ROUTER_EVENT") {
       const data: {
         path: string;
@@ -117,6 +118,17 @@ export default function Webview({ navigation, route }: WebviewScreenProps) {
       } = nativeEvent.data;
       Toast.show(data.message, {
         type: data.type === "success" ? "success" : "danger",
+      });
+    } else if (nativeEvent?.type === "OPEN_BROWSER_EVENT") {
+      const data: {
+        url: string;
+      } = nativeEvent.data;
+      Linking.canOpenURL(data.url).then(supported => {
+        if (supported) {
+          Linking.openURL(data.url);
+        } else {
+          console.log("Don't know how to open URI: " + data.url);
+        }
       });
     }
   };
