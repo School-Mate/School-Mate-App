@@ -156,14 +156,17 @@ export default function Webview({ navigation, route }: WebviewScreenProps) {
             },
           }}
           allowFileAccess
+          showsVerticalScrollIndicator={false}
+          decelerationRate="normal"
           onLoad={() => setVisible(false)}
           onMessage={requestOnMessage}
           userAgent={`SchoolMateApp ${Platform.OS}`}
           scrollEnabled={route.params?.scrollenabled ?? false}
           hideKeyboardAccessoryView={true}
           automaticallyAdjustContentInsets={false}
+          renderLoading={() => <Loading />}
+          startInLoadingState={true}
         />
-        {visible && <Loading />}
       </KeyboardAvoidingView>
     </View>
   );
