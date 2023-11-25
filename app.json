@@ -11,7 +11,9 @@
       "resizeMode": "contain",
       "backgroundColor": "#2545ED"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "kr.codest.schoolmateapp",
@@ -37,6 +39,11 @@
       },
       "package": "kr.codest.schoolmateapp",
       "versionCode": 1
+    },
+    "extra": {
+      "eas": {
+        "projectId": "b6290774-e9df-4309-80fe-a1f3ba06b603"
+      }
     }
   }
 }
