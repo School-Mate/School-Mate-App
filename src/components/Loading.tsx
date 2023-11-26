@@ -1,30 +1,13 @@
-import { View, StyleSheet } from "react-native";
-import useDimensions from "@hooks/useDimensions";
-import ViewLayout from "./layouts/ViewLayout";
-import Lottie from "./Lottie";
+import { View, ActivityIndicator } from "react-native";
 
 export default function Loading() {
   return (
     <View
       style={{
-        width: "100%",
-        height: "100%",
-        justifyContent: "center",
-        alignItems: "center",
-        position: "absolute",
-        backgroundColor: "rgba(0,0,0,0.5)",
+        flex: 1,
       }}
     >
-      <Lottie
-        autoPlay
-        source={require("../../assets/lottieFiles/loading.json")}
-        loop
-        speed={1.7}
-        style={{
-          width: 80,
-          height: 80,
-        }}
-      />
+      <ActivityIndicator size="large" color="#2545ED" />
     </View>
   );
 }

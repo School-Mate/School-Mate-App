@@ -1,4 +1,3 @@
-import Lottie from "@/components/Lottie";
 import { StatusBar } from "expo-status-bar";
 import { Image, View } from "react-native";
 

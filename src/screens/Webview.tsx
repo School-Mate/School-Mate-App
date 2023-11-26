@@ -5,6 +5,7 @@ import type { StackScreenProps } from "@react-navigation/stack";
 import { RootStackParamList } from "@/types/statcks";
 import * as SecureStore from "expo-secure-store";
 import {
+  ActivityIndicator,
   KeyboardAvoidingView,
   Linking,
   NativeModules,
