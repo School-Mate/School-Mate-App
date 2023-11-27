@@ -17,6 +17,7 @@ import Loading from "@/components/Loading";
 import { Toast } from "react-native-toast-notifications";
 import { authState } from "@/recoil/authState";
 import { useRecoilState } from "recoil";
+import { StatusBar } from "expo-status-bar";
 
 export type WebviewScreenProps = StackScreenProps<
   RootStackParamList,
@@ -135,41 +136,46 @@ export default function Webview({ navigation, route }: WebviewScreenProps) {
   };
 
   return (
-    <View
-      style={{
-        flex: 1,
-        backgroundColor: "#fff",
-      }}
-    >
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-        style={{ flex: 1 }}
+    <>
+      <StatusBar style="dark" backgroundColor="#fff" translucent={false} />
+
+      <SafeAreaView
+        style={{
+          flex: 1,
+          backgroundColor: "#fff",
+        }}
       >
-        <WebView
-          originWhitelist={["*"]}
-          source={{
-            uri: url,
-          }}
-          nativeConfig={{
-            props: {
-              webContentsDebuggingEnabled: true,
-              console: new MyLogger(),
-            },
-          }}
-          allowFileAccess
-          showsVerticalScrollIndicator={false}
-          decelerationRate="normal"
-          onLoad={() => setVisible(false)}
-          onMessage={requestOnMessage}
-          userAgent={`SchoolMateApp ${Platform.OS}`}
-          scrollEnabled={route.params?.scrollenabled ?? false}
-          hideKeyboardAccessoryView={true}
-          automaticallyAdjustContentInsets={false}
-          renderLoading={() => <Loading />}
-          startInLoadingState={true}
-        />
-      </KeyboardAvoidingView>
-    </View>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
+          style={{ flex: 1 }}
+        >
+          <WebView
+            style={{ flex: 1 }}
+            originWhitelist={["*"]}
+            source={{
+              uri: url,
+            }}
+            nativeConfig={{
+              props: {
+                webContentsDebuggingEnabled: true,
+                console: new MyLogger(),
+              },
+            }}
+            allowFileAccess
+            showsVerticalScrollIndicator={false}
+            decelerationRate="normal"
+            onLoad={() => setVisible(false)}
+            onMessage={requestOnMessage}
+            userAgent={`SchoolMateApp ${Platform.OS}`}
+            scrollEnabled={route.params?.scrollenabled ?? false}
+            hideKeyboardAccessoryView={true}
+            automaticallyAdjustContentInsets={false}
+            renderLoading={() => <Loading />}
+            startInLoadingState={true}
+          />
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </>
   );
 }
 
