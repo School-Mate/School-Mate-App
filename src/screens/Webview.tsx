@@ -4,6 +4,7 @@ import { StackActions } from "@react-navigation/native";
 import type { StackScreenProps } from "@react-navigation/stack";
 import { RootStackParamList } from "@/types/statcks";
 import * as SecureStore from "expo-secure-store";
+import { URL } from "react-native-url-polyfill";
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -11,6 +12,8 @@ import {
   NativeModules,
   Platform,
   SafeAreaView,
+  Text,
+  TextInput,
   View,
 } from "react-native";
 import Loading from "@/components/Loading";
@@ -18,6 +21,9 @@ import { Toast } from "react-native-toast-notifications";
 import { authState } from "@/recoil/authState";
 import { useRecoilState } from "recoil";
 import { StatusBar } from "expo-status-bar";
+import Commnet from "@/components/Comment";
+import { checkHybridRoutePath } from "@/lib/CheckHybridRoute";
+import { isValidURL } from "@/lib/utils";
 
 export type WebviewScreenProps = StackScreenProps<
   RootStackParamList,
@@ -25,10 +31,16 @@ export type WebviewScreenProps = StackScreenProps<
 >;
 
 export default function Webview({ navigation, route }: WebviewScreenProps) {
-  const [visible, setVisible] = useState(true);
+  const [loading, setLoading] = useState(true);
   const [auth, setAuth] = useRecoilState(authState);
+  const webView = useRef<WebView>(null);
   const targetUrl = process.env.EXPO_PUBLIC_WEBVIEW_URL;
-  const url = route.params?.url ?? targetUrl + "/intro";
+  const url = route.params?.url
+    ? isValidURL(route.params?.url)
+      ? route.params?.url
+      : targetUrl + route.params?.url
+    : targetUrl + "/intro";
+  const parsedUrl = new URL(url);
 
   const requestOnMessage = async (e: WebViewMessageEvent): Promise<void> => {
     const nativeEvent = JSON.parse(e.nativeEvent.data);
@@ -58,12 +70,20 @@ export default function Webview({ navigation, route }: WebviewScreenProps) {
             ],
           });
         } else {
-          const pushAction = StackActions.push("Webview", {
-            url: `${targetUrl}${data.path}`,
-            isStack: true,
-            scrollenabled: data.scroll,
-          });
-          navigation.dispatch(pushAction);
+          const hybridRoute = checkHybridRoutePath(data.path);
+          if (hybridRoute) {
+            const pushAction = StackActions.push(hybridRoute.path, {
+              ...hybridRoute.params,
+            });
+            navigation.dispatch(pushAction);
+          } else {
+            const pushAction = StackActions.push("Webview", {
+              url: `${targetUrl}${data.path}`,
+              isStack: true,
+              scrollenabled: data.scroll,
+            });
+            navigation.dispatch(pushAction);
+          }
         }
       }
     } else if (nativeEvent?.type === "LOGIN_EVENT") {
@@ -150,6 +170,7 @@ export default function Webview({ navigation, route }: WebviewScreenProps) {
           style={{ flex: 1 }}
         >
           <WebView
+            ref={webView}
             style={{ flex: 1 }}
             originWhitelist={["*"]}
             source={{
@@ -164,7 +185,7 @@ export default function Webview({ navigation, route }: WebviewScreenProps) {
             allowFileAccess
             showsVerticalScrollIndicator={false}
             decelerationRate="normal"
-            onLoad={() => setVisible(false)}
+            onLoad={() => setLoading(false)}
             onMessage={requestOnMessage}
             userAgent={`SchoolMateApp ${Platform.OS}`}
             scrollEnabled={route.params?.scrollenabled ?? false}
@@ -173,6 +194,9 @@ export default function Webview({ navigation, route }: WebviewScreenProps) {
             renderLoading={() => <Loading />}
             startInLoadingState={true}
           />
+          {/\/board\/\d+\/\d+/.test(parsedUrl.pathname) && !loading && (
+            <Commnet webview={webView} />
+          )}
         </KeyboardAvoidingView>
       </SafeAreaView>
     </>

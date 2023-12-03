@@ -6,6 +6,7 @@ import Webview from "@/screens/Webview";
 import { RootStackParamList } from "@/types/statcks";
 import { authState } from "@/recoil/authState";
 import { useRecoilState } from "recoil";
+import ArticleWrite from "@/screens/ArticleWrite";
 
 const Stack = createStackNavigator<RootStackParamList>();
 export default function RootNavigator() {
@@ -48,6 +49,13 @@ export default function RootNavigator() {
           scrollenabled: true,
         }}
         component={Webview}
+      />
+      <Stack.Screen
+        options={{
+          ...TransitionPresets.BottomSheetAndroid,
+        }}
+        name="ArticleWrite"
+        component={ArticleWrite}
       />
     </Stack.Navigator>
   );
