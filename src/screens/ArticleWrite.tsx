@@ -1,6 +1,6 @@
 import { RootStackParamList } from "@/types/statcks";
 import { StackScreenProps } from "@react-navigation/stack";
-import { useLayoutEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 import { HeaderLeftCancel } from "@components/layouts/HeaderLeft";
 import * as ImagePicker from "expo-image-picker";
 import {
@@ -15,10 +15,17 @@ import {
   Image,
   KeyboardAvoidingView,
   Platform,
+  ScrollView,
+  Alert,
 } from "react-native";
-import { Link, NavigationProp } from "@react-navigation/native";
 import BouncyCheckbox from "react-native-bouncy-checkbox";
 import { Toast } from "react-native-toast-notifications";
+import fetcher, { sendXmlHttpRequest } from "@/lib/Fetcher";
+import useFetch from "@/hooks/useFetch";
+import { useRecoilState } from "recoil";
+import { authState } from "@/recoil/authState";
+import * as ImageManipulator from "expo-image-manipulator";
+import axios from "axios";
 
 export type ArticleWriteScreenProps = StackScreenProps<
   RootStackParamList,
@@ -27,74 +34,264 @@ export type ArticleWriteScreenProps = StackScreenProps<
 
 const ArticleWrite = ({ navigation, route }: ArticleWriteScreenProps) => {
   const [isAnonymous, setIsAnonymous] = useState(false);
-  const [assets, setAssets] = useState();
+  const [uploadedImages, setUploadedImages] = useState<
+    {
+      uri: string;
+      key: string;
+    }[]
+  >([]);
+  const [auth, setAuth] = useRecoilState(authState);
+  const [uploading, setUploading] = useState(false);
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
 
+  const { triggerFetch: deleteImage } = useFetch({
+    fetchOptions: {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${auth.accessToken}`,
+      },
+    },
+    onSuccess: (status, message, data) => {
+      setUploadedImages(prev => prev.filter(v => v.key !== data.id));
+      Toast.show("이미지가 삭제되었습니다.", {
+        type: "success",
+      });
+    },
+    onError: (status, message) => {
+      Toast.show(message, {
+        type: "danger",
+      });
+    },
+  });
+
+  const { triggerFetch: writeArticle } = useFetch({
+    fetchOptions: {
+      url: `/board/${route.params.boardId}`,
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${auth.accessToken}`,
+      },
+    },
+    onSuccess: (status, message, data) => {
+      setUploading(false);
+      Toast.show("글이 작성되었습니다.", {
+        type: "success",
+      });
+
+      navigation.reset({
+        routes: [
+          {
+            name: "Webview",
+            params: {
+              url: `/board`,
+            },
+          },
+          {
+            name: "Webview",
+            params: {
+              url: `/board/${route.params.boardId}`,
+            },
+          },
+          {
+            name: "Webview",
+            params: {
+              url: `/board/${route.params.boardId}/${data.id}`,
+            },
+          },
+        ],
+      });
+    },
+    onError: (status, message, body) => {
+      setUploading(false);
+      Toast.show(message, {
+        type: "danger",
+      });
+    },
+    onPending: () => {
+      setUploading(true);
+    },
+  });
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <TouchableOpacity
+          disabled={uploading || !title || !content}
+          onPress={() => {
+            if (title === "") {
+              Toast.show("제목을 입력해주세요.", {
+                type: "danger",
+              });
+              return;
+            }
+
+            if (content === "") {
+              Toast.show("내용을 입력해주세요.", {
+                type: "danger",
+              });
+              return;
+            }
+
+            Alert.alert("글을 작성하시겠습니까?", undefined, [
+              {
+                text: "취소",
+                onPress: () => {
+                  return;
+                },
+              },
+              {
+                text: "확인",
+                onPress: () => {
+                  writeArticle({
+                    fetchOptions: {
+                      data: {
+                        title: title,
+                        content: content,
+                        isAnonymous: isAnonymous,
+                        images: uploadedImages.map(v => v.key),
+                      },
+                    },
+                  });
+                },
+              },
+            ]);
+          }}
+        >
+          <Text
+            style={{
+              marginRight: 15,
+              fontSize: 16,
+              color: title && content ? "#007AFF" : "#999",
+            }}
+          >
+            완료
+          </Text>
+        </TouchableOpacity>
+      ),
+    });
+  }, [title, content, isAnonymous, uploadedImages]);
   useLayoutEffect(() => {
     navigation.setOptions({
       headerShown: true,
       headerTitle: "글 쓰기",
       headerTitleAlign: "center",
       headerLeft: () => <HeaderLeftCancel navigation={navigation} />,
-      headerRight: () => (
-        <TouchableOpacity
-          onPress={() => {
-            console.log("저장");
-          }}
-        >
-          <Text style={{ marginRight: 15, fontSize: 16, color: "#007AFF" }}>
-            완료
-          </Text>
-        </TouchableOpacity>
-      ),
     });
   }, []);
 
-  const handleCallbackImage = () => {};
-
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={{ padding: 15 }}>
-        <Alert navigation={navigation} />
-        <View style={styles.container}>
-          <TextInput
-            style={styles.titleInput}
-            onChangeText={(text) => console.log(text)}
-            placeholder="제목을 입력하세요"
-          />
-          <TextInput
-            style={styles.contentInput}
-            onChangeText={(text) => console.log(text)}
-            placeholder="자유롭게 이야기나 질문을 해보세요"
-            multiline={true}
-          />
-        </View>
-      </View>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-        style={{ flex: 1 }}
+    <>
+      <SafeAreaView
+        style={{
+          flex: 1,
+          backgroundColor: "#fff",
+        }}
       >
-        <ArticleBottomItem
-          isAnonymous={isAnonymous}
-          callbackIsAnonymous={setIsAnonymous}
-          callbackImages={handleCallbackImage}
-        />
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+        <ScrollView
+          contentContainerStyle={{ flexGrow: 1 }}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={{ padding: 15 }}>
+            <AlertBadage navigation={navigation} />
+            <View style={styles.container}>
+              <TextInput
+                style={styles.titleInput}
+                onChangeText={setTitle}
+                placeholder="제목을 입력하세요"
+              />
+              <TextInput
+                style={styles.contentInput}
+                onChangeText={setContent}
+                placeholder="자유롭게 이야기나 질문을 해보세요"
+                multiline={true}
+              />
+              {/* upload image List */}
+              <ScrollView style={styles.uploadImageList} horizontal>
+                {uploadedImages.map((image, index) => (
+                  <View key={index} style={styles.uploadImageItem}>
+                    <Image
+                      source={{ uri: image.uri }}
+                      style={styles.uploadImage}
+                    />
+                    <TouchableOpacity
+                      style={styles.uploadImageDeleteButton}
+                      onPress={() => {
+                        deleteImage({
+                          fetchOptions: {
+                            url: `/image/${image.key}`,
+                          },
+                        });
+                      }}
+                    >
+                      <Image
+                        source={require("../../assets/icons/cancel.png")}
+                        style={{
+                          width: 10,
+                          height: 10,
+                        }}
+                      />
+                    </TouchableOpacity>
+                  </View>
+                ))}
+              </ScrollView>
+            </View>
+          </View>
+        </ScrollView>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
+        >
+          <ArticleBottomItem
+            isAnonymous={isAnonymous}
+            callbackIsAnonymous={setIsAnonymous}
+            callbackImages={async (formData, url) => {
+              await sendXmlHttpRequest("/image", formData, {
+                Authorization: `Bearer ${auth.accessToken}`,
+                storage: "article",
+              })
+                .then((res: any) => {
+                  Toast.show("이미지가 업로드 되었습니다.", {
+                    type: "success",
+                  });
+                  setUploadedImages(prev => [
+                    ...prev,
+                    {
+                      uri: url,
+                      key: res.data,
+                    },
+                  ]);
+                })
+                .catch(e => {
+                  Toast.show(e.message, {
+                    type: "danger",
+                  });
+                });
+            }}
+          />
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </>
   );
 };
 
 const ArticleBottomItem = ({
   isAnonymous,
   callbackIsAnonymous,
+  callbackImages,
 }: {
   isAnonymous: boolean;
   callbackIsAnonymous: (isAnonymous: boolean) => void;
-  callbackImages: () => void;
+  callbackImages: (formdata: FormData, url: string) => void;
 }) => {
-  const fetchImageFromUri = async (uri: string) => {
-    const response = await fetch(uri);
-    const blob = await response.blob();
-    return blob;
+  const fetchImageFromUri = async (url: string) => {
+    const imageData = await ImageManipulator.manipulateAsync(url, [], {
+      compress: 0.6,
+      format: ImageManipulator.SaveFormat.JPEG,
+      base64: true,
+    });
+
+    return imageData;
   };
 
   const handleSelectImage = async () => {
@@ -107,19 +304,22 @@ const ArticleBottomItem = ({
 
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [4, 3],
       quality: 1,
+      selectionLimit: 5,
     });
     if (result.canceled) return;
 
-    for await (const asset of result.assets) {
-      const image = await fetchImageFromUri(asset.uri);
-      if (
-        Platform.OS === "ios" &&
-        (image.type.endsWith("image/heic") || image.type.endsWith("image/HEIC"))
-      ) {
-      }
+    for await (const image of result.assets) {
+      const imageData = await fetchImageFromUri(image.uri);
+      const formData = new FormData();
+      const uriArray = imageData.uri.split(".");
+      const fileExtension = uriArray[uriArray.length - 1];
+      formData.append("img", {
+        uri: imageData.uri,
+        type: `image/${fileExtension}`,
+        name: `image.${fileExtension}`,
+      } as any);
+      callbackImages(formData, imageData.uri);
     }
   };
 
@@ -166,7 +366,7 @@ const ArticleBottomItem = ({
             marginRight: 8,
             fontSize: 15,
             fontWeight: "bold",
-            color: "#7C7C7C"
+            color: "#7C7C7C",
           }}
         >
           사진 첨부
@@ -183,7 +383,7 @@ const ArticleBottomItem = ({
   );
 };
 
-const Alert = ({ navigation }: { navigation: any }) => {
+const AlertBadage = ({ navigation }: { navigation: any }) => {
   return (
     <View style={styles.alert}>
       <Pressable
@@ -217,17 +417,12 @@ const Alert = ({ navigation }: { navigation: any }) => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     backgroundColor: "#fff",
     flexDirection: "column",
   },
   bottomContainer: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    bottom: 0,
     backgroundColor: "white",
-    height: 60,
+    height: 55,
     borderTopWidth: 1,
     borderTopColor: "#e5e5e5",
     display: "flex",
@@ -257,9 +452,11 @@ const styles = StyleSheet.create({
     borderBottomColor: "#F0F0F0",
   },
   contentInput: {
-    height: Dimensions.get("window").height - 270,
+    paddingBottom: 10,
+    minHeight: 150,
     marginTop: 10,
     fontSize: 15,
+    textAlignVertical: "top",
     borderBottomColor: "#F0F0F0",
   },
   checkboxContainer: {
@@ -274,8 +471,40 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "bold",
   },
-  imageUploadContainer: {
-    width: 15,
+  uploadImageList: {
+    display: "flex",
+    width: "100%",
+    flexDirection: "row",
+    marginTop: 10,
+  },
+  uploadImageItem: {
+    width: 100,
+    height: 100,
+    marginRight: 10,
+    marginBottom: 10,
+    borderRadius: 10,
+    overflow: "hidden",
+  },
+  uploadImage: {
+    width: "100%",
+    height: "100%",
+  },
+  uploadImageDeleteButton: {
+    position: "absolute",
+    top: 3,
+    right: 3,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: "rgba(0, 0, 0, 0.2)",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  uploadImageDeleteButtonText: {
+    color: "white",
+    fontSize: 12,
+    fontWeight: "bold",
   },
 });
 
