@@ -17,6 +17,7 @@ import {
   Platform,
   ScrollView,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import BouncyCheckbox from "react-native-bouncy-checkbox";
 import { Toast } from "react-native-toast-notifications";
@@ -34,37 +35,12 @@ export type ArticleWriteScreenProps = StackScreenProps<
 
 const ArticleWrite = ({ navigation, route }: ArticleWriteScreenProps) => {
   const [isAnonymous, setIsAnonymous] = useState(false);
-  const [uploadedImages, setUploadedImages] = useState<
-    {
-      uri: string;
-      key: string;
-    }[]
-  >([]);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [uploadedImages, setUploadedImages] = useState<ImageType[]>([]);
   const [auth, setAuth] = useRecoilState(authState);
   const [uploading, setUploading] = useState(false);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-
-  const { triggerFetch: deleteImage } = useFetch({
-    fetchOptions: {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${auth.accessToken}`,
-      },
-    },
-    onSuccess: (status, message, data) => {
-      setUploadedImages(prev => prev.filter(v => v.key !== data.id));
-      Toast.show("이미지가 삭제되었습니다.", {
-        type: "success",
-      });
-    },
-    onError: (status, message) => {
-      Toast.show(message, {
-        type: "danger",
-      });
-    },
-  });
-
   const { triggerFetch: writeArticle } = useFetch({
     fetchOptions: {
       url: `/board/${route.params.boardId}`,
@@ -209,31 +185,22 @@ const ArticleWrite = ({ navigation, route }: ArticleWriteScreenProps) => {
               {/* upload image List */}
               <ScrollView style={styles.uploadImageList} horizontal>
                 {uploadedImages.map((image, index) => (
-                  <View key={index} style={styles.uploadImageItem}>
-                    <Image
-                      source={{ uri: image.uri }}
-                      style={styles.uploadImage}
-                    />
-                    <TouchableOpacity
-                      style={styles.uploadImageDeleteButton}
-                      onPress={() => {
-                        deleteImage({
-                          fetchOptions: {
-                            url: `/image/${image.key}`,
-                          },
-                        });
-                      }}
-                    >
-                      <Image
-                        source={require("../../assets/icons/cancel.png")}
-                        style={{
-                          width: 10,
-                          height: 10,
-                        }}
-                      />
-                    </TouchableOpacity>
-                  </View>
+                  <ArticleUploadImage
+                    key={index}
+                    image={image}
+                    callbackDeleteImage={key => {
+                      setUploadedImages(prev =>
+                        prev.filter(v => v.key !== key)
+                      );
+                    }}
+                    accessToken={auth.accessToken}
+                  />
                 ))}
+                {uploadingImage && (
+                  <View style={styles.uploadImageItem}>
+                    <ActivityIndicator size="large" color="#2545ED" />
+                  </View>
+                )}
               </ScrollView>
             </View>
           </View>
@@ -246,6 +213,7 @@ const ArticleWrite = ({ navigation, route }: ArticleWriteScreenProps) => {
             isAnonymous={isAnonymous}
             callbackIsAnonymous={setIsAnonymous}
             callbackImages={async (formData, url) => {
+              setUploadingImage(true);
               await sendXmlHttpRequest("/image", formData, {
                 Authorization: `Bearer ${auth.accessToken}`,
                 storage: "article",
@@ -266,11 +234,96 @@ const ArticleWrite = ({ navigation, route }: ArticleWriteScreenProps) => {
                   Toast.show(e.message, {
                     type: "danger",
                   });
+                })
+                .finally(() => {
+                  setUploadingImage(false);
                 });
             }}
           />
         </KeyboardAvoidingView>
       </SafeAreaView>
+    </>
+  );
+};
+type ImageType = {
+  uri: string;
+  key: string;
+};
+
+type ArticleBottomItemProps = {
+  image: ImageType;
+  accessToken?: string;
+  callbackDeleteImage: (key: string) => void;
+};
+
+const ArticleUploadImage = ({
+  image,
+  accessToken,
+  callbackDeleteImage,
+}: ArticleBottomItemProps) => {
+  const [deleteImageLoading, setDeleteImageLoading] = useState(false);
+  const { triggerFetch: deleteImage } = useFetch({
+    fetchOptions: {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    },
+    onPending: () => setDeleteImageLoading(true),
+    onSuccess: (status, message, data) => {
+      setDeleteImageLoading(false);
+      callbackDeleteImage(data.id);
+      Toast.show("이미지가 삭제되었습니다.", {
+        type: "success",
+      });
+    },
+    onError: (status, message) => {
+      setDeleteImageLoading(false);
+      Toast.show(message, {
+        type: "danger",
+      });
+    },
+  });
+
+  return (
+    <>
+      <View style={styles.uploadImageItem}>
+        <Image source={{ uri: image.uri }} style={styles.uploadImage} />
+        {deleteImageLoading && (
+          <View
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: "100%",
+              height: "100%",
+              backgroundColor: "rgba(0,0,0,0.3)",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <ActivityIndicator size="large" color="#fff" />
+          </View>
+        )}
+        <TouchableOpacity
+          style={styles.uploadImageDeleteButton}
+          onPress={() => {
+            deleteImage({
+              fetchOptions: {
+                url: `/image/${image.key}`,
+              },
+            });
+          }}
+        >
+          <Image
+            source={require("../../assets/icons/cancel.png")}
+            style={{
+              width: 10,
+              height: 10,
+            }}
+          />
+        </TouchableOpacity>
+      </View>
     </>
   );
 };
@@ -484,6 +537,10 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     borderRadius: 10,
     overflow: "hidden",
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "#E5E5E5",
   },
   uploadImage: {
     width: "100%",

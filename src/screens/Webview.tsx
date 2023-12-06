@@ -6,15 +6,11 @@ import { RootStackParamList } from "@/types/statcks";
 import * as SecureStore from "expo-secure-store";
 import { URL } from "react-native-url-polyfill";
 import {
-  ActivityIndicator,
+  Alert,
   KeyboardAvoidingView,
   Linking,
-  NativeModules,
   Platform,
   SafeAreaView,
-  Text,
-  TextInput,
-  View,
 } from "react-native";
 import Loading from "@/components/Loading";
 import { Toast } from "react-native-toast-notifications";
@@ -152,6 +148,32 @@ export default function Webview({ navigation, route }: WebviewScreenProps) {
           console.log("Don't know how to open URI: " + data.url);
         }
       });
+    } else if (nativeEvent?.type === "LOGOUT_EVENT") {
+      Alert.alert("로그아웃", "지금 로그아웃 하시겠습니까?", [
+        {
+          text: "취소",
+          onPress: () => {},
+          style: "cancel",
+        },
+        {
+          text: "로그아웃",
+          onPress: async () => {
+            await SecureStore.deleteItemAsync("accessToken");
+            await SecureStore.deleteItemAsync("refreshToken");
+            setAuth({
+              accessToken: "",
+              refreshToken: "",
+            });
+            if (webView.current) {
+              webView.current.postMessage(
+                JSON.stringify({
+                  type: "LOGOUT_EVENT",
+                })
+              );
+            }
+          },
+        },
+      ]);
     }
   };
 
