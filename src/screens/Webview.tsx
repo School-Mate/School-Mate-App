@@ -106,18 +106,6 @@ export default function Webview({ navigation, route }: WebviewScreenProps) {
             accessToken: data.token?.accessToken ?? "",
             refreshToken: data.token?.refreshToken ?? "",
           });
-          navigation.reset({
-            index: 0,
-            routes: [
-              {
-                name: "Webview",
-                params: {
-                  url: `${targetUrl}/main`,
-                  isStack: false,
-                },
-              },
-            ],
-          });
         }
       } else if (data.type === "request") {
         if (data.loginType === "apple") {
