@@ -1,4 +1,4 @@
-import { RefObject, useRef, useState } from "react";
+import { RefObject, useState } from "react";
 import {
   View,
   Text,
@@ -10,27 +10,26 @@ import {
 import BouncyCheckbox from "react-native-bouncy-checkbox";
 import WebView from "react-native-webview";
 
-const Commnet = ({ webview }: { webview: RefObject<WebView> }) => {
+const AskedComment = ({ webview }: { webview: RefObject<WebView> }) => {
   const [isAnonymous, setIsAnonymous] = useState(false);
-  const [comment, setComment] = useState<string>();
-  const checkboxRef = useRef<BouncyCheckbox>(null);
+  const [question, setQuestion] = useState<string>();
 
-  const postComment = () => {
-    if (comment == "" || comment == undefined) return;
+  const postAsked = () => {
+    if (question == "" || question == undefined) return;
 
     if (webview.current) {
       webview.current.postMessage(
         JSON.stringify({
-          type: "COMMENT",
+          type: "ASKED_QUESTION",
           data: {
-            comment,
+            question,
             isAnonymous,
           },
         })
       );
     }
 
-    setComment("");
+    setQuestion("");
   };
 
   return (
@@ -51,7 +50,6 @@ const Commnet = ({ webview }: { webview: RefObject<WebView> }) => {
                 borderRadius: 5,
                 borderColor: isAnonymous ? "#2545ED" : "#E5E5E5",
               }}
-              ref={checkboxRef}
               textComponent={
                 <Text
                   style={{
@@ -67,12 +65,12 @@ const Commnet = ({ webview }: { webview: RefObject<WebView> }) => {
           </View>
           <TextInput
             style={styles.input}
-            value={comment}
-            onChangeText={setComment}
-            placeholder="댓글을 입력해주세요."
+            value={question}
+            onChangeText={setQuestion}
+            placeholder="질문을 입력해주세요"
           />
 
-          <Pressable onPress={postComment} style={styles.button}>
+          <Pressable onPress={postAsked} style={styles.button}>
             <Text
               style={{
                 color: "white",
@@ -149,4 +147,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Commnet;
+export default AskedComment;

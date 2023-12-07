@@ -20,6 +20,8 @@ import { StatusBar } from "expo-status-bar";
 import Commnet from "@/components/Comment";
 import { checkHybridRoutePath } from "@/lib/CheckHybridRoute";
 import { isValidURL } from "@/lib/utils";
+import AskedComment from "@/components/AskedComment";
+import AskedReply from "@/components/AskedReply";
 
 export type WebviewScreenProps = StackScreenProps<
   RootStackParamList,
@@ -28,6 +30,7 @@ export type WebviewScreenProps = StackScreenProps<
 
 export default function Webview({ navigation, route }: WebviewScreenProps) {
   const [loading, setLoading] = useState(true);
+  const [showCommnetContainer, setShowCommnetContainer] = useState(false);
   const [auth, setAuth] = useRecoilState(authState);
   const webView = useRef<WebView>(null);
   const targetUrl = process.env.EXPO_PUBLIC_WEBVIEW_URL;
@@ -129,7 +132,7 @@ export default function Webview({ navigation, route }: WebviewScreenProps) {
       const data: {
         url: string;
       } = nativeEvent.data;
-      Linking.canOpenURL(data.url).then(supported => {
+      Linking.canOpenURL(data.url).then((supported) => {
         if (supported) {
           Linking.openURL(data.url);
         } else {
@@ -162,6 +165,11 @@ export default function Webview({ navigation, route }: WebviewScreenProps) {
           },
         },
       ]);
+    } else if (nativeEvent?.type === "ASKED_REPLAY_EVENT") {
+      const data: {
+        replyed: boolean;
+      } = nativeEvent.data;
+      setShowCommnetContainer(!data.replyed);
     }
   };
 
@@ -207,6 +215,13 @@ export default function Webview({ navigation, route }: WebviewScreenProps) {
           {/\/board\/\d+\/\d+/.test(parsedUrl.pathname) && !loading && (
             <Commnet webview={webView} />
           )}
+          {/^\/asked\/(?!intro$|modify$)[^\/]+\/?$/.test(parsedUrl.pathname) &&
+            !loading && <AskedComment webview={webView} />}
+          {/\/asked\/([a-fA-F0-9-]+)\/([a-fA-F0-9-]+)/.test(
+            parsedUrl.pathname
+          ) &&
+            showCommnetContainer &&
+            !loading && <AskedReply webview={webView} />}
         </KeyboardAvoidingView>
       </SafeAreaView>
     </>
