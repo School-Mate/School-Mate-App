@@ -50,9 +50,15 @@ function SchoolMateApp() {
     async function prepare() {
       const accessToken = await SecureStore.getItemAsync("accessToken");
       const refreshToken = await SecureStore.getItemAsync("refreshToken");
-      const pushToken = await registerForPushNotificationsAsync();
       if (!accessToken || !refreshToken) {
         return setAppIsReady(true);
+      }
+
+      let pushToken;
+      try {
+        pushToken = await registerForPushNotificationsAsync();
+      } catch (e) {
+        console.log(e);
       }
 
       const {
@@ -122,6 +128,7 @@ function SchoolMateApp() {
         await Splash.hideAsync();
 
         if (url) {
+          if (!auth.accessToken) return;
           const { path, queryParams } = Linking.parse(url);
           if (path === "view" && queryParams?.url) {
             if (!isAllowPath(queryParams.url as string)) return;
@@ -140,7 +147,7 @@ function SchoolMateApp() {
           Notifications.addNotificationResponseReceivedListener(response => {
             const pushdata = response.notification.request.content
               .data as PushMessageData;
-
+            if (!auth.accessToken) return;
             if (pushdata.type === "openstack") {
               const pushAction = StackActions.push("Webview", {
                 url: pushdata.url,
