@@ -132,7 +132,7 @@ export default function Webview({ navigation, route }: WebviewScreenProps) {
       const data: {
         url: string;
       } = nativeEvent.data;
-      Linking.canOpenURL(data.url).then((supported) => {
+      Linking.canOpenURL(data.url).then(supported => {
         if (supported) {
           Linking.openURL(data.url);
         } else {
