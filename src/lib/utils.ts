@@ -44,7 +44,7 @@ export async function registerForPushNotificationsAsync() {
       return;
     }
     token = await Notifications.getExpoPushTokenAsync({
-      projectId: Constants.default.easConfig?.projectId,
+      projectId: process.env.EXPO_PUBLIC_PROJECT_ID,
     });
     console.log(token);
   } else {

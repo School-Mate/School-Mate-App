@@ -3,7 +3,7 @@ export default {
     name: "스쿨메이트",
     slug: "schoolmate-app",
     scheme: "schoolmate",
-    version: "1.0.9",
+    version: "1.0.10",
     orientation: "portrait",
     icon: "./assets/icon.png",
     userInterfaceStyle: "light",
@@ -31,7 +31,7 @@ export default {
         usesNonExemptEncryption: false,
       },
       associatedDomains: ["applinks:app.schoolmate.kr"],
-      buildNumber: "1.0.9",
+      buildNumber: "1.0.10",
       infoPlist: {
         NSCameraUsageDescription:
           "게시글, 학교인증, 프로필에 사진을 업로드하기 위해 카메라에 접근합니다.",
@@ -53,7 +53,7 @@ export default {
         backgroundColor: "#2545ED",
       },
       package: "kr.codest.schoolmateapp",
-      versionCode: 10,
+      versionCode: 11,
       googleServicesFile: process.env.GOOGLE_SERVICES_JSON,
       intentFilters: [
         {
@@ -62,7 +62,7 @@ export default {
             {
               scheme: "https",
               host: "app.schoolmate.kr",
-              pathPrefix: "/",
+              pathPrefix: "/view",
             },
           ],
           category: ["BROWSABLE", "DEFAULT"],
@@ -92,6 +92,16 @@ export default {
         },
       ],
       ["sentry-expo"],
+      [
+        "@sentry/react-native/expo",
+        {
+          url: "https://sentry.io/",
+          warning: "DO NOT COMMIT YOUR AUTH TOKEN",
+          authToken: process.env.SENTRY_AUTH_TOKEN,
+          project: process.env.SENTRY_PROJECT,
+          organization: process.env.SENTRY_ORGANIZATION,
+        },
+      ],
     ],
   },
 };
