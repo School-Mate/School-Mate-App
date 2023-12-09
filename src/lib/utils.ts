@@ -23,11 +23,11 @@ export async function registerForPushNotificationsAsync() {
   let token;
 
   if (Platform.OS === "android") {
-    Notifications.setNotificationChannelAsync("알림", {
-      name: "알림",
+    Notifications.setNotificationChannelAsync("default", {
+      name: "default",
       importance: Notifications.AndroidImportance.MAX,
       vibrationPattern: [0, 250, 250, 250],
-      lightColor: "#FF231F7C",
+      lightColor: "#FFFFFF",
     });
   }
 

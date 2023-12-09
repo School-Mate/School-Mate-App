@@ -1,8 +1,7 @@
 import SplashScreen from "@screens/SplashScreen";
 import * as Splash from "expo-splash-screen";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
-  LinkingOptions,
   NavigationContainer,
   NavigationContainerRef,
   StackActions,
@@ -11,12 +10,19 @@ import RootNavigator from "@/navigator/RootNavigator";
 import SchoolMateToastProvider from "@/lib/ToastProvider";
 import useFetch from "@/hooks/useFetch";
 import * as SecureStore from "expo-secure-store";
-import { RecoilRoot, selector, useRecoilState } from "recoil";
+import { RecoilRoot, useRecoilState } from "recoil";
 import { authState } from "@/recoil/authState";
 import * as Notifications from "expo-notifications";
 import { isAllowPath, registerForPushNotificationsAsync } from "@/lib/utils";
 import { PushMessageData } from "@/types/auth";
 import * as Linking from "expo-linking";
+import * as Sentry from "@sentry/react-native";
+
+Sentry.init({
+  dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
+  debug: __DEV__ ? true : false,
+  tracesSampleRate: 1.0,
+});
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -58,7 +64,7 @@ function SchoolMateApp() {
       try {
         pushToken = await registerForPushNotificationsAsync();
       } catch (e) {
-        console.log(e);
+        Sentry.captureException(e);
       }
 
       const {
@@ -224,10 +230,12 @@ function SchoolMateApp() {
   );
 }
 
-export default function App() {
+function App() {
   return (
     <RecoilRoot>
       <SchoolMateApp />
     </RecoilRoot>
   );
 }
+
+export default Sentry.wrap(App);
