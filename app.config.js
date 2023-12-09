@@ -92,16 +92,6 @@ export default {
         },
       ],
       ["sentry-expo"],
-      [
-        "@sentry/react-native/expo",
-        {
-          url: "https://sentry.io/",
-          warning: "DO NOT COMMIT YOUR AUTH TOKEN",
-          authToken: process.env.SENTRY_AUTH_TOKEN,
-          project: process.env.SENTRY_PROJECT,
-          organization: process.env.SENTRY_ORGANIZATION,
-        },
-      ],
     ],
   },
 };
