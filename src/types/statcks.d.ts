@@ -4,4 +4,8 @@ export type RootStackParamList = {
   ArticleWrite: {
     boardId: string;
   };
+  ArticleReport: {
+    boardId: string;
+    articleId: string;
+  };
 };

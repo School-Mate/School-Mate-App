@@ -7,6 +7,7 @@ import { RootStackParamList } from "@/types/statcks";
 import { authState } from "@/recoil/authState";
 import { useRecoilState } from "recoil";
 import ArticleWrite from "@/screens/ArticleWrite";
+import ArticleReport from "@/screens/ArticleReport";
 
 const Stack = createStackNavigator<RootStackParamList>();
 export default function RootNavigator() {
@@ -56,6 +57,13 @@ export default function RootNavigator() {
         }}
         name="ArticleWrite"
         component={ArticleWrite}
+      />
+      <Stack.Screen
+        options={{
+          ...TransitionPresets.BottomSheetAndroid,
+        }}
+        name="ArticleReport"
+        component={ArticleReport}
       />
     </Stack.Navigator>
   );

@@ -8,6 +8,10 @@ const HybridRoutePath: {
     pattern: /\/board\/(\d+)\/write/,
     paramsNames: ["boardId"],
   },
+  ArticleReport: {
+    pattern: /\/board\/(\d+)\/(\d+)\/report/,
+    paramsNames: ["boardId", "articleId"],
+  },
 };
 
 export const checkHybridRoutePath = (

@@ -3,7 +3,7 @@ export default {
     name: "스쿨메이트",
     slug: "schoolmate-app",
     scheme: "schoolmate",
-    version: "1.0.7",
+    version: "1.0.8",
     orientation: "portrait",
     icon: "./assets/icon.png",
     userInterfaceStyle: "light",
@@ -20,11 +20,12 @@ export default {
         usesNonExemptEncryption: false,
       },
       associatedDomains: ["applinks:app.schoolmate.kr"],
-      buildNumber: "1.0.7",
+      buildNumber: "1.0.8",
       infoPlist: {
-        NSCameraUsageDescription: "카메라를 사용하여 사진을 찍습니다.",
+        NSCameraUsageDescription:
+          "게시글, 학교인증, 프로필에 사진을 업로드하기 위해 카메라에 접근합니다.",
         NSPhotoLibraryUsageDescription:
-          "사진을 불러오기 위해 사진 라이브러리에 접근합니다.",
+          "게시글, 학교인증, 프로필에 사진을 업로드하기 위해 사진 라이브러리에 접근합니다.",
         CFBundleDevelopmentRegion: "ko",
       },
       googleServicesFile: process.env.GOOGLE_SERVICES_APPLE_JSON,
@@ -41,7 +42,7 @@ export default {
         backgroundColor: "#2545ED",
       },
       package: "kr.codest.schoolmateapp",
-      versionCode: 8,
+      versionCode: 9,
       googleServicesFile: process.env.GOOGLE_SERVICES_JSON,
       intentFilters: [
         {
@@ -68,7 +69,7 @@ export default {
         "expo-image-picker",
         {
           photosPermission:
-            "사진을 불러오기 위해 사진 라이브러리에 접근합니다.",
+            "게시글, 학교인증, 프로필에 사진을 업로드하기 위해 사진 라이브러리에 접근합니다.",
         },
       ],
       [
