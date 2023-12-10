@@ -1,5 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
-import { WebView, WebViewMessageEvent } from "react-native-webview";
+import {
+  WebView,
+  WebViewMessageEvent,
+  WebViewNavigation,
+} from "react-native-webview";
 import { StackActions } from "@react-navigation/native";
 import type { StackScreenProps } from "@react-navigation/stack";
 import { RootStackParamList } from "@/types/statcks";
@@ -173,6 +177,19 @@ export default function Webview({ navigation, route }: WebviewScreenProps) {
     }
   };
 
+  const onNavigationStateChange = (navState: WebViewNavigation) => {
+    const whiteListUrl = new URL(process.env.EXPO_PUBLIC_WEBVIEW_URL as string);
+    const navStateUrl = new URL(navState.url);
+    if (loading) return;
+    if (navStateUrl.host !== parsedUrl.host) {
+      if (whiteListUrl.host !== navStateUrl.host) {
+        webView.current?.stopLoading();
+        Linking.openURL(navState.url);
+        return false;
+      }
+    }
+  };
+
   return (
     <>
       <StatusBar style="dark" backgroundColor="#fff" translucent={false} />
@@ -194,12 +211,6 @@ export default function Webview({ navigation, route }: WebviewScreenProps) {
             source={{
               uri: url,
             }}
-            nativeConfig={{
-              props: {
-                webContentsDebuggingEnabled: true,
-                console: new MyLogger(),
-              },
-            }}
             allowFileAccess
             showsVerticalScrollIndicator={false}
             decelerationRate="normal"
@@ -211,6 +222,15 @@ export default function Webview({ navigation, route }: WebviewScreenProps) {
             automaticallyAdjustContentInsets={false}
             renderLoading={() => <Loading />}
             startInLoadingState={true}
+            javaScriptEnabled={true}
+            domStorageEnabled
+            thirdPartyCookiesEnabled
+            mediaPlaybackRequiresUserAction={true}
+            allowUniversalAccessFromFileURLs={true}
+            allowFileAccessFromFileURLs={true}
+            allowsInlineMediaPlayback={Platform.OS === "ios" ? true : false}
+            onNavigationStateChange={onNavigationStateChange}
+            allowsAirPlayForMediaPlayback
           />
           {/\/board\/\d+\/\d+/.test(parsedUrl.pathname) && !loading && (
             <Commnet webview={webView} />
@@ -226,10 +246,4 @@ export default function Webview({ navigation, route }: WebviewScreenProps) {
       </SafeAreaView>
     </>
   );
-}
-
-class MyLogger {
-  log = (message: any) => {
-    console.log(message); // Print in RN logs for now...
-  };
 }
