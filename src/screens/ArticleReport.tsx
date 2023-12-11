@@ -37,9 +37,9 @@ const ArticleReport = ({ navigation, route }: ArticleReportScreenProps) => {
     },
     onSuccess: (status, message, data) => {
       setUploading(false);
-      Toast.show("신고가 접수되었습니다.", {
-        type: "success",
-      });
+      Alert.alert(
+        "신고가 접수되었습니다.\n처리까지 최대 24시간이 소요될 수 있습니다."
+      );
 
       navigation.reset({
         routes: [
@@ -58,7 +58,7 @@ const ArticleReport = ({ navigation, route }: ArticleReportScreenProps) => {
           {
             name: "Webview",
             params: {
-              url: `/board/${route.params.boardId}/${route.params.articleId}`,
+              url: `/board/${route.params.boardId}/${route.params.articleId}/report/${data.id}`,
             },
           },
         ],

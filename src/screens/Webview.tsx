@@ -136,7 +136,7 @@ export default function Webview({ navigation, route }: WebviewScreenProps) {
       const data: {
         url: string;
       } = nativeEvent.data;
-      Linking.canOpenURL(data.url).then(supported => {
+      Linking.canOpenURL(data.url).then((supported) => {
         if (supported) {
           Linking.openURL(data.url);
         } else {
@@ -232,7 +232,7 @@ export default function Webview({ navigation, route }: WebviewScreenProps) {
             onNavigationStateChange={onNavigationStateChange}
             allowsAirPlayForMediaPlayback
           />
-          {/\/board\/\d+\/\d+/.test(parsedUrl.pathname) && !loading && (
+          {/\/board\/\d+\/\d+$/.test(parsedUrl.pathname) && !loading && (
             <Commnet webview={webView} />
           )}
           {/^\/asked\/(?!intro$|modify$)[^\/]+\/?$/.test(parsedUrl.pathname) &&
