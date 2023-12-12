@@ -9,6 +9,7 @@ import type { StackScreenProps } from "@react-navigation/stack";
 import { RootStackParamList } from "@/types/statcks";
 import * as SecureStore from "expo-secure-store";
 import { URL } from "react-native-url-polyfill";
+import * as WebBrowser from "expo-web-browser";
 import {
   Alert,
   KeyboardAvoidingView,
@@ -26,6 +27,10 @@ import { checkHybridRoutePath } from "@/lib/CheckHybridRoute";
 import { isValidURL } from "@/lib/utils";
 import AskedComment from "@/components/AskedComment";
 import AskedReply from "@/components/AskedReply";
+import {
+  OnShouldStartLoadWithRequest,
+  ShouldStartLoadRequest,
+} from "react-native-webview/lib/WebViewTypes";
 
 export type WebviewScreenProps = StackScreenProps<
   RootStackParamList,
@@ -136,13 +141,7 @@ export default function Webview({ navigation, route }: WebviewScreenProps) {
       const data: {
         url: string;
       } = nativeEvent.data;
-      Linking.canOpenURL(data.url).then((supported) => {
-        if (supported) {
-          Linking.openURL(data.url);
-        } else {
-          console.log("Don't know how to open URI: " + data.url);
-        }
-      });
+      WebBrowser.openBrowserAsync(data.url);
     } else if (nativeEvent?.type === "LOGOUT_EVENT") {
       Alert.alert("로그아웃", "지금 로그아웃 하시겠습니까?", [
         {
@@ -181,10 +180,11 @@ export default function Webview({ navigation, route }: WebviewScreenProps) {
     const whiteListUrl = new URL(process.env.EXPO_PUBLIC_WEBVIEW_URL as string);
     const navStateUrl = new URL(navState.url);
     if (loading) return;
+    if (navState.navigationType != "click") return;
     if (navStateUrl.host !== parsedUrl.host) {
       if (whiteListUrl.host !== navStateUrl.host) {
         webView.current?.stopLoading();
-        Linking.openURL(navState.url);
+        WebBrowser.openBrowserAsync(navState.url);
         return false;
       }
     }
