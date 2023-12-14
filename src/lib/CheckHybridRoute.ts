@@ -12,6 +12,10 @@ const HybridRoutePath: {
     pattern: /\/board\/(\d+)\/(\d+)\/report/,
     paramsNames: ["boardId", "articleId"],
   },
+  UserReport: {
+    pattern: /\/user\/([^\/]+)\/report/,
+    paramsNames: ["userId"],
+  },
 };
 
 export const checkHybridRoutePath = (
@@ -23,8 +27,8 @@ export const checkHybridRoutePath = (
   };
 } | null => {
   const keys = Object.keys(HybridRoutePath);
-  const key = keys.find(key => HybridRoutePath[key].pattern.test(path));
-
+  const key = keys.find((key) => HybridRoutePath[key].pattern.test(path));
+  console.log(key, keys);
   if (key) {
     return {
       path: key,
