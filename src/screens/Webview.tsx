@@ -79,7 +79,6 @@ export default function Webview({ navigation, route }: WebviewScreenProps) {
           });
         } else {
           const hybridRoute = checkHybridRoutePath(data.path);
-          console.log(hybridRoute, data.path);
           if (hybridRoute) {
             const pushAction = StackActions.push(hybridRoute.path, {
               ...hybridRoute.params,

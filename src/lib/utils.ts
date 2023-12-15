@@ -46,7 +46,6 @@ export async function registerForPushNotificationsAsync() {
     token = await Notifications.getExpoPushTokenAsync({
       projectId: process.env.EXPO_PUBLIC_PROJECT_ID,
     });
-    console.log(token);
   } else {
     Alert.alert("실제 기기에서만 푸시 알림을 받을 수 있습니다.");
   }

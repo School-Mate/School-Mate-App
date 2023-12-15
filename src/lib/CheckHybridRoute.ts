@@ -27,8 +27,7 @@ export const checkHybridRoutePath = (
   };
 } | null => {
   const keys = Object.keys(HybridRoutePath);
-  const key = keys.find((key) => HybridRoutePath[key].pattern.test(path));
-  console.log(key, keys);
+  const key = keys.find(key => HybridRoutePath[key].pattern.test(path));
   if (key) {
     return {
       path: key,
