@@ -3,7 +3,7 @@ export default {
     name: "스쿨메이트",
     slug: "schoolmate-app",
     scheme: "schoolmate",
-    version: "1.0.13",
+    version: "1.0.14",
     orientation: "portrait",
     icon: "./assets/icon.png",
     userInterfaceStyle: "light",
@@ -31,7 +31,7 @@ export default {
         usesNonExemptEncryption: false,
       },
       associatedDomains: ["applinks:app.schoolmate.kr"],
-      buildNumber: "1.0.13",
+      buildNumber: "1.0.14",
       infoPlist: {
         NSCameraUsageDescription:
           "게시글, 학교인증, 프로필에 사진을 업로드하기 위해 카메라에 접근합니다.",
@@ -53,7 +53,7 @@ export default {
         backgroundColor: "#2545ED",
       },
       package: "kr.codest.schoolmateapp",
-      versionCode: 14,
+      versionCode: 15,
       googleServicesFile: process.env.GOOGLE_SERVICES_JSON,
       intentFilters: [
         {

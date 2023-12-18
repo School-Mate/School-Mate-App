@@ -53,6 +53,19 @@ function SchoolMateApp() {
   const responseListener = useRef<Notifications.Subscription>();
 
   useEffect(() => {
+    if (url && appIsReady) {
+      if (!auth.accessToken || !auth.verfiyed) return;
+      const { path, queryParams } = Linking.parse(url);
+      if (path === "view" && queryParams?.url) {
+        if (!isAllowPath(queryParams.url as string)) return;
+        console.log(queryParams);
+        const pushAction = StackActions.push("Webview", queryParams as any);
+        navigationRef.current?.dispatch(pushAction);
+      }
+    }
+  }, [url]);
+
+  useEffect(() => {
     async function prepare() {
       const accessToken = await SecureStore.getItemAsync("accessToken");
       const refreshToken = await SecureStore.getItemAsync("refreshToken");
@@ -99,6 +112,7 @@ function SchoolMateApp() {
           setAuth({
             accessToken: refreshAuthData.accessToken,
             refreshToken: refreshAuthData.refreshToken,
+            verfiyed: refreshAuthData.verfiyed,
           });
           await SecureStore.setItemAsync(
             "accessToken",
@@ -117,6 +131,7 @@ function SchoolMateApp() {
         setAuth({
           accessToken: authData.accessToken,
           refreshToken: authData.refreshToken,
+          verfiyed: authData.verfiyed,
         });
         await SecureStore.setItemAsync("accessToken", authData.accessToken);
         await SecureStore.setItemAsync("refreshToken", authData.refreshToken);
@@ -132,9 +147,8 @@ function SchoolMateApp() {
     if (appIsReady) {
       (async () => {
         await Splash.hideAsync();
-
         if (url) {
-          if (!auth.accessToken) return;
+          if (!auth.accessToken || !auth.verfiyed) return;
           const { path, queryParams } = Linking.parse(url);
           if (path === "view" && queryParams?.url) {
             if (!isAllowPath(queryParams.url as string)) return;
