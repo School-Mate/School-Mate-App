@@ -3,7 +3,7 @@ export default {
     name: "스쿨메이트",
     slug: "schoolmate-app",
     scheme: "schoolmate",
-    version: "1.0.14",
+    version: "1.1.0",
     orientation: "portrait",
     icon: "./assets/icon.png",
     userInterfaceStyle: "light",
@@ -30,8 +30,11 @@ export default {
       config: {
         usesNonExemptEncryption: false,
       },
-      associatedDomains: ["applinks:app.schoolmate.kr"],
-      buildNumber: "1.0.14",
+      associatedDomains: [
+        "applinks:app.schoolmate.kr",
+        "applinks:schoolmate.onelink.me",
+      ],
+      buildNumber: "1.1.0",
       infoPlist: {
         NSCameraUsageDescription:
           "게시글, 학교인증, 프로필에 사진을 업로드하기 위해 카메라에 접근합니다.",
@@ -53,7 +56,7 @@ export default {
         backgroundColor: "#2545ED",
       },
       package: "kr.codest.schoolmateapp",
-      versionCode: 15,
+      versionCode: 17,
       googleServicesFile: process.env.GOOGLE_SERVICES_JSON,
       intentFilters: [
         {
@@ -63,6 +66,11 @@ export default {
               scheme: "https",
               host: "app.schoolmate.kr",
               pathPrefix: "/view",
+            },
+            {
+              scheme: "https",
+              host: "schoolmate.onelink.me",
+              pathPrefix: "/xwaO",
             },
           ],
           category: ["BROWSABLE", "DEFAULT"],
@@ -92,6 +100,8 @@ export default {
         },
       ],
       ["sentry-expo"],
+      ["react-native-appsflyer", {}],
+      "@react-native-firebase/app",
     ],
   },
 };

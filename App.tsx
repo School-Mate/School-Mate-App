@@ -1,6 +1,6 @@
 import SplashScreen from "@screens/SplashScreen";
 import * as Splash from "expo-splash-screen";
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   NavigationContainer,
   NavigationContainerRef,
@@ -17,10 +17,13 @@ import { isAllowPath, registerForPushNotificationsAsync } from "@/lib/utils";
 import { PushMessageData } from "@/types/auth";
 import * as Linking from "expo-linking";
 import * as Sentry from "@sentry/react-native";
+import AppsFlyerHandler from "@/components/AppsFlyer/InitializeSDKHandler";
+import appsFlyer from "react-native-appsflyer";
+import analytics from "@react-native-firebase/analytics";
 
 Sentry.init({
   dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
-  debug: __DEV__ ? true : false,
+  debug: false,
   tracesSampleRate: 1.0,
 });
 
@@ -53,20 +56,10 @@ function SchoolMateApp() {
   const responseListener = useRef<Notifications.Subscription>();
 
   useEffect(() => {
-    if (url && appIsReady) {
-      if (!auth.accessToken || !auth.verfiyed) return;
-      const { path, queryParams } = Linking.parse(url);
-      if (path === "view" && queryParams?.url) {
-        if (!isAllowPath(queryParams.url as string)) return;
-        console.log(queryParams);
-        const pushAction = StackActions.push("Webview", queryParams as any);
-        navigationRef.current?.dispatch(pushAction);
-      }
-    }
-  }, [url]);
-
-  useEffect(() => {
     async function prepare() {
+      analytics().logEvent("app_open", {
+        app_open: true,
+      });
       const accessToken = await SecureStore.getItemAsync("accessToken");
       const refreshToken = await SecureStore.getItemAsync("refreshToken");
       if (!accessToken || !refreshToken) {
@@ -145,8 +138,56 @@ function SchoolMateApp() {
 
   useEffect(() => {
     if (appIsReady) {
+      const listener = Linking.addEventListener("url", event => {
+        if (event) {
+          if (!auth.accessToken || !auth.verfiyed) return;
+          const { path, queryParams } = Linking.parse(event.url);
+          if (path === "view" && queryParams?.url) {
+            if (!isAllowPath(queryParams.url as string)) return;
+            const pushAction = StackActions.push("Webview", queryParams as any);
+            navigationRef.current?.dispatch(pushAction);
+          }
+        }
+      });
+
+      return () => {
+        listener.remove();
+      };
+    }
+  }, [appIsReady]);
+
+  useEffect(() => {
+    if (appIsReady) {
+      const onDeepLinkCanceller = appsFlyer.onDeepLink(res => {
+        if (!auth.accessToken || !auth.verfiyed) return;
+        if (res?.deepLinkStatus === "FOUND") {
+          if (
+            res?.data.deep_link_value &&
+            isAllowPath(res?.data.deep_link_value)
+          ) {
+            const pushAction = StackActions.push("Webview", {
+              url: res?.data.deep_link_value,
+              isStack: true,
+              scrollenabled: true,
+            });
+            navigationRef.current?.dispatch(pushAction);
+          }
+        } else if (res?.deepLinkStatus === "NOT_FOUND") {
+          console.log("Deep Link was not found");
+        }
+      });
+
+      return () => {
+        onDeepLinkCanceller();
+      };
+    }
+  }, [appIsReady]);
+
+  useEffect(() => {
+    if (appIsReady) {
       (async () => {
         await Splash.hideAsync();
+
         if (url) {
           if (!auth.accessToken || !auth.verfiyed) return;
           const { path, queryParams } = Linking.parse(url);
@@ -247,6 +288,7 @@ function SchoolMateApp() {
 function App() {
   return (
     <RecoilRoot>
+      <AppsFlyerHandler />
       <SchoolMateApp />
     </RecoilRoot>
   );
