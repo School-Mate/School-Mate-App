@@ -1,6 +1,7 @@
 export default {
   expo: {
     name: "스쿨메이트",
+    owner: "codest-kr",
     slug: "schoolmate-app",
     scheme: "schoolmate",
     version: "1.1.0",
