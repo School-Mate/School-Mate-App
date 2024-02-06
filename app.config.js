@@ -4,7 +4,7 @@ export default {
     owner: "codest-kr",
     slug: "schoolmate-app",
     scheme: "schoolmate",
-    version: "1.1.1",
+    version: "1.2.1",
     orientation: "portrait",
     icon: "./assets/icon.png",
     userInterfaceStyle: "light",
@@ -35,7 +35,7 @@ export default {
         "applinks:app.schoolmate.kr",
         "applinks:schoolmate.onelink.me",
       ],
-      buildNumber: "1.1.1",
+      buildNumber: "1.2.1",
       infoPlist: {
         NSCameraUsageDescription:
           "게시글, 학교인증, 프로필에 사진을 업로드하기 위해 카메라에 접근합니다.",
@@ -57,7 +57,7 @@ export default {
         backgroundColor: "#2545ED",
       },
       package: "kr.codest.schoolmateapp",
-      versionCode: 18,
+      versionCode: 19,
       googleServicesFile: process.env.GOOGLE_SERVICES_JSON,
       intentFilters: [
         {
@@ -103,6 +103,27 @@ export default {
       ["sentry-expo"],
       ["react-native-appsflyer", {}],
       "@react-native-firebase/app",
+      [
+        "react-native-fbsdk-next",
+        {
+          appID: "346813614779840",
+          clientToken: "96251ff184511caf82c19843218319a2",
+          displayName: "스쿨메이트",
+          scheme: "fb346813614779840",
+          advertiserIDCollectionEnabled: false,
+          autoLogAppEventsEnabled: false,
+          isAutoInitEnabled: true,
+          iosUserTrackingPermission:
+            "광고를 표시하고 사용자의 활동을 추적하기 위해 사용됩니다.",
+        },
+      ],
+      [
+        "expo-tracking-transparency",
+        {
+          userTrackingPermission:
+            "광고를 표시하고 사용자의 활동을 추적하기 위해 사용됩니다.",
+        },
+      ],
     ],
   },
 };

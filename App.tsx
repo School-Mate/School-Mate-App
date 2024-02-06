@@ -20,6 +20,8 @@ import * as Sentry from "@sentry/react-native";
 import AppsFlyerHandler from "@/components/AppsFlyer/InitializeSDKHandler";
 import appsFlyer from "react-native-appsflyer";
 import analytics from "@react-native-firebase/analytics";
+import { requestTrackingPermissionsAsync } from "expo-tracking-transparency";
+import { Settings as FacebookSDKInitialize } from "react-native-fbsdk-next";
 
 Sentry.init({
   dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
@@ -60,6 +62,7 @@ function SchoolMateApp() {
       analytics().logEvent("app_open", {
         app_open: true,
       });
+      FacebookSDKInitialize.initializeSDK();
       const accessToken = await SecureStore.getItemAsync("accessToken");
       const refreshToken = await SecureStore.getItemAsync("refreshToken");
       if (!accessToken || !refreshToken) {
@@ -69,6 +72,16 @@ function SchoolMateApp() {
       let pushToken;
       try {
         pushToken = await registerForPushNotificationsAsync();
+      } catch (e) {
+        Sentry.captureException(e);
+      }
+
+      try {
+        const { status } = await requestTrackingPermissionsAsync();
+
+        if (status === "granted") {
+          await FacebookSDKInitialize.setAdvertiserTrackingEnabled(true);
+        }
       } catch (e) {
         Sentry.captureException(e);
       }

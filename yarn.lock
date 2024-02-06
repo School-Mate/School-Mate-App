@@ -3576,6 +3576,11 @@ expo-status-bar@~1.6.0:
   resolved "https://registry.yarnpkg.com/expo-status-bar/-/expo-status-bar-1.6.0.tgz#e79ffdb9a84d2e0ec9a0dc7392d9ab364fefa9cf"
   integrity sha512-e//Oi2WPdomMlMDD3skE4+1ZarKCJ/suvcB4Jo/nO427niKug5oppcPNYO+csR6y3ZglGuypS+3pp/hJ+Xp6fQ==
 
+expo-tracking-transparency@~3.1.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/expo-tracking-transparency/-/expo-tracking-transparency-3.1.0.tgz#cecdaaae62db20f8ad85b4adf6b2595be9f95a51"
+  integrity sha512-3945pmJNZ450DHoaeKzsMMK0S8ZO/4GkfaaFRRjWf0UGydgAYkTrB/Xh3MbU4UuyioJogLyf9AKLy6fsPgbVZw==
+
 expo-updates-interface@~0.10.0:
   version "0.10.1"
   resolved "https://registry.yarnpkg.com/expo-updates-interface/-/expo-updates-interface-0.10.1.tgz#cab075641cd381718ccd9264bf133dc393430a44"
@@ -5980,6 +5985,11 @@ react-native-bouncy-checkbox@^3.0.7:
   version "3.0.7"
   resolved "https://registry.yarnpkg.com/react-native-bouncy-checkbox/-/react-native-bouncy-checkbox-3.0.7.tgz#011aef92b4fbde2a1f223165626c56a9ffe637fb"
   integrity sha512-776TgMGt9wTpOQA1TcvFjL5VUn6o945wFYf3Ztqva62/vT2o3JAezLiP7hYh2Svd+PewfWBYSPMs4jeaSoS8Sg==
+
+react-native-fbsdk-next@^12.1.3:
+  version "12.1.3"
+  resolved "https://registry.yarnpkg.com/react-native-fbsdk-next/-/react-native-fbsdk-next-12.1.3.tgz#097690ca737030b8c33db7bdd462ba373c549cea"
+  integrity sha512-4E+s7Nq51JAhBxWPGiqevIGpxC0SJB6qW1sFcbG2uOEyURpdaKpEHUwbtQt5yehRleFHZcYihGVAVYNpIWldJg==
 
 react-native-gesture-handler@~2.12.0:
   version "2.12.1"
