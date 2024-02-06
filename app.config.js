@@ -4,7 +4,7 @@ export default {
     owner: "codest-kr",
     slug: "schoolmate-app",
     scheme: "schoolmate",
-    version: "1.2.1",
+    version: "1.2.2",
     orientation: "portrait",
     icon: "./assets/icon.png",
     userInterfaceStyle: "light",
@@ -35,13 +35,15 @@ export default {
         "applinks:app.schoolmate.kr",
         "applinks:schoolmate.onelink.me",
       ],
-      buildNumber: "1.2.1",
+      buildNumber: "1.2.2",
       infoPlist: {
         NSCameraUsageDescription:
           "게시글, 학교인증, 프로필에 사진을 업로드하기 위해 카메라에 접근합니다.",
         NSPhotoLibraryUsageDescription:
           "게시글, 학교인증, 프로필에 사진을 업로드하기 위해 사진 라이브러리에 접근합니다.",
         CFBundleDevelopmentRegion: "ko",
+        NSUserTrackingUsageDescription:
+          "광고를 표시하고 사용자의 활동을 추적하기 위해 사용됩니다.",
       },
       googleServicesFile: process.env.GOOGLE_SERVICES_APPLE_JSON,
     },
