@@ -27,10 +27,6 @@ import { checkHybridRoutePath } from "@/lib/CheckHybridRoute";
 import { isValidURL } from "@/lib/utils";
 import AskedComment from "@/components/AskedComment";
 import AskedReply from "@/components/AskedReply";
-import {
-  OnShouldStartLoadWithRequest,
-  ShouldStartLoadRequest,
-} from "react-native-webview/lib/WebViewTypes";
 
 export type WebviewScreenProps = StackScreenProps<
   RootStackParamList,
@@ -127,6 +123,8 @@ export default function Webview({ navigation, route }: WebviewScreenProps) {
               console.log("User canceled Apple Sign in.");
             }
           }
+        } else if (data.loginType === "kakao") {
+          console.log("kakao login");
         }
       }
     } else if (nativeEvent?.type === "TOAST_EVENT") {
@@ -211,6 +209,7 @@ export default function Webview({ navigation, route }: WebviewScreenProps) {
             source={{
               uri: url,
             }}
+            cacheEnabled
             allowFileAccess
             showsVerticalScrollIndicator={false}
             decelerationRate="normal"
