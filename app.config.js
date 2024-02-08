@@ -131,7 +131,7 @@ export default {
         "@react-native-seoul/kakao-login",
         {
           kakaoAppKey: "02fe35d1477b01c2556b9797dbd098bc", // 필수
-          kotlinVersion: "1.5.10", // Android Only, Optional, Expo 내부 패키지들과의 충돌이 있어 테스트 결과 1.5.10은 문제가 없었습니다. 지정 안하면 1.5.10으로 설정됩니다.
+          kotlinVersion: "1.9.0", // Android Only, Optional, Expo 내부 패키지들과의 충돌이 있어 테스트 결과 1.5.10은 문제가 없었습니다. 지정 안하면 1.5.10으로 설정됩니다.
         },
       ],
       "expo-apple-authentication",
