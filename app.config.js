@@ -4,7 +4,7 @@ export default {
     owner: "codest-kr",
     slug: "schoolmate-app",
     scheme: "schoolmate",
-    version: "1.2.2",
+    version: "1.3.2",
     orientation: "portrait",
     icon: "./assets/icon.png",
     userInterfaceStyle: "light",
@@ -28,6 +28,7 @@ export default {
     ios: {
       supportsTablet: false,
       bundleIdentifier: "kr.codest.schoolmateapp",
+      usesAppleSignIn: true,
       config: {
         usesNonExemptEncryption: false,
       },
@@ -35,7 +36,7 @@ export default {
         "applinks:app.schoolmate.kr",
         "applinks:schoolmate.onelink.me",
       ],
-      buildNumber: "1.2.2",
+      buildNumber: "1.3.2",
       infoPlist: {
         NSCameraUsageDescription:
           "게시글, 학교인증, 프로필에 사진을 업로드하기 위해 카메라에 접근합니다.",
@@ -59,7 +60,7 @@ export default {
         backgroundColor: "#2545ED",
       },
       package: "kr.codest.schoolmateapp",
-      versionCode: 19,
+      versionCode: 20,
       googleServicesFile: process.env.GOOGLE_SERVICES_JSON,
       intentFilters: [
         {
@@ -126,6 +127,14 @@ export default {
             "광고를 표시하고 사용자의 활동을 추적하기 위해 사용됩니다.",
         },
       ],
+      [
+        "@react-native-seoul/kakao-login",
+        {
+          kakaoAppKey: "02fe35d1477b01c2556b9797dbd098bc", // 필수
+          kotlinVersion: "1.5.10", // Android Only, Optional, Expo 내부 패키지들과의 충돌이 있어 테스트 결과 1.5.10은 문제가 없었습니다. 지정 안하면 1.5.10으로 설정됩니다.
+        },
+      ],
+      "expo-apple-authentication",
     ],
   },
 };

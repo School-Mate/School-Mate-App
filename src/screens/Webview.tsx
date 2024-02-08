@@ -27,6 +27,10 @@ import { checkHybridRoutePath } from "@/lib/CheckHybridRoute";
 import { isValidURL } from "@/lib/utils";
 import AskedComment from "@/components/AskedComment";
 import AskedReply from "@/components/AskedReply";
+import * as AppleAuthentication from "expo-apple-authentication";
+import { login as KakaoLogin } from "@react-native-seoul/kakao-login";
+import fetcher from "@/lib/Fetcher";
+import { AxiosError } from "axios";
 
 export type WebviewScreenProps = StackScreenProps<
   RootStackParamList,
@@ -45,6 +49,12 @@ export default function Webview({ navigation, route }: WebviewScreenProps) {
       : targetUrl + route.params?.url
     : targetUrl + "/intro";
   const parsedUrl = new URL(url);
+
+  const postMessage = (data: any) => {
+    if (webView.current) {
+      webView.current.postMessage(JSON.stringify(data));
+    }
+  };
 
   const requestOnMessage = async (e: WebViewMessageEvent): Promise<void> => {
     const nativeEvent = JSON.parse(e.nativeEvent.data);
@@ -92,7 +102,7 @@ export default function Webview({ navigation, route }: WebviewScreenProps) {
       }
     } else if (nativeEvent?.type === "LOGIN_EVENT") {
       const data: {
-        type: "callback" | "request";
+        type: "callback" | "request" | "signout";
         loginType: "kakao" | "apple" | "phone";
         token?: {
           accessToken: string;
@@ -101,30 +111,95 @@ export default function Webview({ navigation, route }: WebviewScreenProps) {
       } = nativeEvent.data;
 
       if (data.type === "callback") {
-        if (data.loginType === "phone") {
-          await SecureStore.setItemAsync(
-            "accessToken",
-            data.token?.accessToken ?? ""
-          );
-          await SecureStore.setItemAsync(
-            "refreshToken",
-            data.token?.refreshToken ?? ""
-          );
-          setAuth({
-            accessToken: data.token?.accessToken ?? "",
-            refreshToken: data.token?.refreshToken ?? "",
-          });
-        }
+        await SecureStore.setItemAsync(
+          "accessToken",
+          data.token?.accessToken ?? ""
+        );
+        await SecureStore.setItemAsync(
+          "refreshToken",
+          data.token?.refreshToken ?? ""
+        );
+        setAuth({
+          accessToken: data.token?.accessToken ?? "",
+          refreshToken: data.token?.refreshToken ?? "",
+        });
       } else if (data.type === "request") {
         if (data.loginType === "apple") {
           try {
+            const appleLoginData = await AppleAuthentication.signInAsync({
+              requestedScopes: [
+                AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+                AppleAuthentication.AppleAuthenticationScope.EMAIL,
+              ],
+            });
+
+            const { data: appleLogin } = await fetcher.post(
+              `/auth/apple/callback?code=${appleLoginData.authorizationCode}`,
+              {
+                ...(appleLoginData.fullName
+                  ? {
+                      name: `${appleLoginData.fullName.familyName}${appleLoginData.fullName.givenName}`,
+                    }
+                  : {}),
+              }
+            );
+
+            await SecureStore.setItemAsync(
+              "accessToken",
+              appleLogin.data.token.accessToken ?? ""
+            );
+            await SecureStore.setItemAsync(
+              "refreshToken",
+              appleLogin.data.token.refreshToken ?? ""
+            );
+            setAuth({
+              accessToken: appleLogin.data.token.accessToken,
+              refreshToken: appleLogin.data.token.refreshToken,
+            });
+
+            navigation.reset({
+              index: 0,
+              routes: [
+                {
+                  name: "Webview",
+                  params: {
+                    url: `/auth/login/app?token=${appleLogin.data.token.accessToken}`,
+                  },
+                },
+              ],
+            });
           } catch (e: any) {
-            if (e.code == "ERR_REQUEST_CANCELED") {
-              console.log("User canceled Apple Sign in.");
+            if (e instanceof AxiosError) {
+              Toast.show(e.response?.data.message, {
+                type: "danger",
+              });
             }
+            postMessage({
+              type: "LOGIN_EVENT",
+              data: {
+                type: "cancel",
+              },
+            });
           }
         } else if (data.loginType === "kakao") {
-          console.log("kakao login");
+          try {
+            const kakoLoginData = await KakaoLogin();
+            postMessage({
+              type: "LOGIN_EVENT",
+              data: {
+                type: "callback",
+                provider: "kakao",
+                code: kakoLoginData.accessToken,
+              },
+            });
+          } catch (e: any) {
+            postMessage({
+              type: "LOGIN_EVENT",
+              data: {
+                type: "cancel",
+              },
+            });
+          }
         }
       }
     } else if (nativeEvent?.type === "TOAST_EVENT") {
@@ -171,6 +246,38 @@ export default function Webview({ navigation, route }: WebviewScreenProps) {
         replyed: boolean;
       } = nativeEvent.data;
       setShowCommnetContainer(!data.replyed);
+    } else if (nativeEvent.type === "APPLE_SIGNOUT_EVENT") {
+      const canLogout = await AppleAuthentication.isAvailableAsync();
+      if (canLogout) {
+      } else {
+        Toast.show("Apple ID가 사용 가능한 기기에서 시도해주세요.", {
+          type: "danger",
+        });
+        Toast.show("Apple ID가 사용 불가한 경우 고객센터에 문의해주세요.", {
+          type: "danger",
+        });
+      }
+
+      try {
+        const appleAuth = await AppleAuthentication.signInAsync();
+
+        postMessage({
+          type: "APPLE_SIGNOUT_EVENT",
+          data: {
+            code: appleAuth.authorizationCode,
+          },
+        });
+      } catch (e: any) {
+        if (e.code === "ERR_NOT_AVAILABLE") {
+          Toast.show("이 기능은 iOS에서만 지원합니다.", {
+            type: "danger",
+          });
+        } else if (e.code === "ERR_REQUEST_CANCELED") {
+          Toast.show("Apple ID 로그인이 필요합니다. 다시 시도해주세요.", {
+            type: "danger",
+          });
+        }
+      }
     }
   };
 
@@ -209,7 +316,7 @@ export default function Webview({ navigation, route }: WebviewScreenProps) {
             source={{
               uri: url,
             }}
-            cacheEnabled
+            sharedCookiesEnabled
             allowFileAccess
             showsVerticalScrollIndicator={false}
             decelerationRate="normal"
