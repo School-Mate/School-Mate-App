@@ -63,6 +63,17 @@ function SchoolMateApp() {
         app_open: true,
       });
       FacebookSDKInitialize.initializeSDK();
+
+      try {
+        const { status } = await requestTrackingPermissionsAsync();
+
+        if (status === "granted") {
+          await FacebookSDKInitialize.setAdvertiserTrackingEnabled(true);
+        }
+      } catch (e) {
+        Sentry.captureException(e);
+      }
+
       const accessToken = await SecureStore.getItemAsync("accessToken");
       const refreshToken = await SecureStore.getItemAsync("refreshToken");
       if (!accessToken || !refreshToken) {
@@ -72,16 +83,6 @@ function SchoolMateApp() {
       let pushToken;
       try {
         pushToken = await registerForPushNotificationsAsync();
-      } catch (e) {
-        Sentry.captureException(e);
-      }
-
-      try {
-        const { status } = await requestTrackingPermissionsAsync();
-
-        if (status === "granted") {
-          await FacebookSDKInitialize.setAdvertiserTrackingEnabled(true);
-        }
       } catch (e) {
         Sentry.captureException(e);
       }
