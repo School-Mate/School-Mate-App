@@ -4,7 +4,7 @@ export default {
     owner: "codest-kr",
     slug: "schoolmate-app",
     scheme: "schoolmate",
-    version: "1.3.4",
+    version: "1.3.5",
     orientation: "portrait",
     icon: "./assets/icon.png",
     userInterfaceStyle: "light",
@@ -36,7 +36,7 @@ export default {
         "applinks:app.schoolmate.kr",
         "applinks:schoolmate.onelink.me",
       ],
-      buildNumber: "1.3.4",
+      buildNumber: "1.3.5",
       infoPlist: {
         NSCameraUsageDescription:
           "게시글, 학교인증, 프로필에 사진을 업로드하기 위해 카메라에 접근합니다.",
