@@ -316,7 +316,6 @@ export default function Webview({ navigation, route }: WebviewScreenProps) {
             source={{
               uri: url,
             }}
-            sharedCookiesEnabled
             allowFileAccess
             showsVerticalScrollIndicator={false}
             decelerationRate="normal"
