@@ -284,15 +284,34 @@ export default function Webview({ navigation, route }: WebviewScreenProps) {
   const onNavigationStateChange = (navState: WebViewNavigation) => {
     const whiteListUrl = new URL(process.env.EXPO_PUBLIC_WEBVIEW_URL as string);
     const navStateUrl = new URL(navState.url);
-    if (loading) return;
-    if (navState.navigationType != "click") return;
-    if (navStateUrl.host !== parsedUrl.host) {
+    if (navState.navigationType === "click") {
       if (whiteListUrl.host !== navStateUrl.host) {
-        webView.current?.stopLoading();
-        WebBrowser.openBrowserAsync(navState.url);
+        try {
+          WebBrowser.openBrowserAsync(navState.url);
+        } catch (e) {
+          console.error(e);
+        }
+        return false;
+      }
+    } else {
+      return true;
+    }
+  };
+
+  const onShouldStartLoadWithRequest = (navState: WebViewNavigation) => {
+    const whiteListUrl = new URL(process.env.EXPO_PUBLIC_WEBVIEW_URL as string);
+    const navStateUrl = new URL(navState.url);
+    if (navState.navigationType === "click") {
+      if (whiteListUrl.host !== navStateUrl.host) {
+        try {
+          WebBrowser.openBrowserAsync(navState.url);
+        } catch (e) {
+          console.error(e);
+        }
         return false;
       }
     }
+    return true;
   };
 
   return (
@@ -335,6 +354,7 @@ export default function Webview({ navigation, route }: WebviewScreenProps) {
             allowFileAccessFromFileURLs={true}
             allowsInlineMediaPlayback={Platform.OS === "ios" ? true : false}
             onNavigationStateChange={onNavigationStateChange}
+            onShouldStartLoadWithRequest={onShouldStartLoadWithRequest}
             allowsAirPlayForMediaPlayback
           />
           {/\/board\/\d+\/\d+$/.test(parsedUrl.pathname) && !loading && (
